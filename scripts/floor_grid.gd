@@ -5,7 +5,7 @@ extends MeshInstance3D
 ## was the trigger for the blank-viewport bug on ANGLE/Intel HD 520.
 
 @export var cells: int = 7
-@export var texture_size: int = 512
+@export var texture_size: int = 1024
 @export var line_width: int = 2
 @export var base_color: Color = Color(0.96, 0.93, 0.7, 1)
 @export var line_color: Color = Color(0.82, 0.76, 0.7, 1)
