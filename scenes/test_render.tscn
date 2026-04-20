@@ -1,10 +1,10 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="PackedScene" path="res://ui/game_ui.tscn" id="1_ui"]
 [ext_resource type="Script" path="res://scripts/placement_controller.gd" id="2_pc"]
 [ext_resource type="Script" path="res://scripts/request_manager.gd" id="3_rm"]
-[ext_resource type="Script" path="res://scripts/grid_manager.gd" id="4_gm"]
 [ext_resource type="Script" path="res://scripts/camera_iso.gd" id="5_cam"]
+[ext_resource type="PackedScene" path="res://scenes/room.tscn" id="6_room"]
 
 [sub_resource type="SphereMesh" id="Sphere_test"]
 radius = 2.0
@@ -14,21 +14,12 @@ height = 4.0
 albedo_color = Color(1, 0.1, 0.2, 1)
 shading_mode = 0
 
-[sub_resource type="BoxMesh" id="Box_ground"]
-size = Vector3(20, 0.2, 20)
+[node name="TestWithRoom" type="Node3D"]
 
-[sub_resource type="StandardMaterial3D" id="Mat_ground"]
-albedo_color = Color(0.2, 0.5, 0.9, 1)
-shading_mode = 0
-
-[node name="TestWithUI" type="Node3D"]
-
-[node name="Ground" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
-mesh = SubResource("Box_ground")
-surface_material_override/0 = SubResource("Mat_ground")
+[node name="Room" parent="." instance=ExtResource("6_room")]
 
 [node name="RedSphere" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2, 5)
 mesh = SubResource("Sphere_test")
 surface_material_override/0 = SubResource("Mat_sphere")
 
@@ -36,19 +27,15 @@ surface_material_override/0 = SubResource("Mat_sphere")
 script = ExtResource("5_cam")
 
 [node name="Camera3D" type="Camera3D" parent="CameraRig"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 10)
+transform = Transform3D(1, 0, 0, 0, 0.8660254, -0.5, 0, 0.5, 0.8660254, 5, 8, 15)
 current = true
 fov = 60.0
-
-[node name="GridManager" type="Node3D" parent="."]
-script = ExtResource("4_gm")
-grid_size = Vector2i(10, 10)
 
 [node name="PlacementController" type="Node3D" parent="."]
 script = ExtResource("2_pc")
 items_parent_path = NodePath("Items")
 camera_path = NodePath("../CameraRig")
-grid_manager_path = NodePath("../GridManager")
+grid_manager_path = NodePath("../Room/GridManager")
 
 [node name="Items" type="Node3D" parent="PlacementController"]
 
