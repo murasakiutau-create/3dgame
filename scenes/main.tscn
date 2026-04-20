@@ -14,10 +14,10 @@ albedo_color = Color(0.96, 0.93, 0.7, 1)
 shading_mode = 0
 
 [sub_resource type="BoxMesh" id="Box_wall"]
-size = Vector3(10, 2, 0.2)
+size = Vector3(10, 3, 0.2)
 
 [sub_resource type="StandardMaterial3D" id="Mat_wall"]
-albedo_color = Color(0.7, 0.85, 1, 1)
+albedo_color = Color(0.95, 0.7, 0.75, 1)
 shading_mode = 0
 
 [node name="Main" type="Node3D"]
@@ -28,12 +28,12 @@ mesh = SubResource("Box_floor")
 surface_material_override/0 = SubResource("Mat_floor")
 
 [node name="WallNorth" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.5, 0)
 mesh = SubResource("Box_wall")
 surface_material_override/0 = SubResource("Mat_wall")
 
 [node name="WallWest" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 5)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1.5, 5)
 mesh = SubResource("Box_wall")
 surface_material_override/0 = SubResource("Mat_wall")
 
@@ -42,7 +42,7 @@ script = ExtResource("4_gm")
 grid_size = Vector2i(10, 10)
 
 [node name="CameraRig" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.7071068, -0.7071068, 0, 0.7071068, 0.7071068, 5, 0, 5)
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.8660254, 0, 0.8660254, 0.5, 5, 0, 5)
 script = ExtResource("5_cam")
 
 [node name="Camera3D" type="Camera3D" parent="CameraRig"]
@@ -51,8 +51,8 @@ current = true
 fov = 55.0
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.7071068, -0.7071068, 0, 0.7071068, 0.7071068, 5, 10, 10)
-light_energy = 1.2
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.8660254, 0, 0.8660254, 0.5, 5, 10, 8)
+light_energy = 1.4
 shadow_enabled = false
 
 [node name="PlacementController" type="Node3D" parent="."]
