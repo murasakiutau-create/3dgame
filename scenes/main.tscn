@@ -1,65 +1,48 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://scripts/camera_iso.gd" id="1_cam"]
+[ext_resource type="PackedScene" path="res://ui/game_ui.tscn" id="1_ui"]
 [ext_resource type="Script" path="res://scripts/placement_controller.gd" id="2_pc"]
 [ext_resource type="Script" path="res://scripts/request_manager.gd" id="3_rm"]
 [ext_resource type="Script" path="res://scripts/grid_manager.gd" id="4_gm"]
-[ext_resource type="PackedScene" path="res://ui/game_ui.tscn" id="5_ui"]
+[ext_resource type="Script" path="res://scripts/camera_iso.gd" id="5_cam"]
 
-[sub_resource type="BoxMesh" id="Box_floor"]
-size = Vector3(10, 0.2, 10)
+[sub_resource type="SphereMesh" id="Sphere_test"]
+radius = 2.0
+height = 4.0
 
-[sub_resource type="StandardMaterial3D" id="Mat_floor"]
-albedo_color = Color(0.96, 0.93, 0.88, 1)
+[sub_resource type="StandardMaterial3D" id="Mat_sphere"]
+albedo_color = Color(1, 0.1, 0.2, 1)
 shading_mode = 0
 
-[sub_resource type="BoxMesh" id="Box_wall"]
-size = Vector3(10, 2, 0.2)
+[sub_resource type="BoxMesh" id="Box_ground"]
+size = Vector3(20, 0.2, 20)
 
-[sub_resource type="StandardMaterial3D" id="Mat_wall"]
-albedo_color = Color(0.78, 0.87, 0.97, 1)
-shading_mode = 0
-
-[sub_resource type="BoxMesh" id="Box_debug"]
-size = Vector3(1.5, 1.5, 1.5)
-
-[sub_resource type="StandardMaterial3D" id="Mat_debug"]
-albedo_color = Color(1, 0.2, 0.3, 1)
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.2, 0.5, 0.9, 1)
 shading_mode = 0
 
 [node name="Main" type="Node3D"]
 
-[node name="Floor" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, -0.1, 5)
-mesh = SubResource("Box_floor")
-surface_material_override/0 = SubResource("Mat_floor")
+[node name="Ground" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+mesh = SubResource("Box_ground")
+surface_material_override/0 = SubResource("Mat_ground")
 
-[node name="WallNorth" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 0)
-mesh = SubResource("Box_wall")
-surface_material_override/0 = SubResource("Mat_wall")
+[node name="RedSphere" type="MeshInstance3D" parent="."]
+mesh = SubResource("Sphere_test")
+surface_material_override/0 = SubResource("Mat_sphere")
 
-[node name="WallWest" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 5)
-mesh = SubResource("Box_wall")
-surface_material_override/0 = SubResource("Mat_wall")
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("5_cam")
 
-[node name="DebugCube" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.75, 5)
-mesh = SubResource("Box_debug")
-surface_material_override/0 = SubResource("Mat_debug")
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 10)
+current = true
+fov = 60.0
 
 [node name="GridManager" type="Node3D" parent="."]
 script = ExtResource("4_gm")
 grid_size = Vector2i(10, 10)
-
-[node name="CameraRig" type="Node3D" parent="."]
-script = ExtResource("1_cam")
-
-[node name="Camera3D" type="Camera3D" parent="CameraRig"]
-transform = Transform3D(1, 0, 0, 0, 0.8660254, -0.5, 0, 0.5, 0.8660254, 5, 8, 15)
-current = true
-fov = 60.0
 
 [node name="PlacementController" type="Node3D" parent="."]
 script = ExtResource("2_pc")
@@ -72,6 +55,6 @@ grid_manager_path = NodePath("../GridManager")
 [node name="RequestManager" type="Node" parent="."]
 script = ExtResource("3_rm")
 
-[node name="GameUI" parent="." instance=ExtResource("5_ui")]
+[node name="GameUI" parent="." instance=ExtResource("1_ui")]
 placement_path = NodePath("../PlacementController")
 request_manager_path = NodePath("../RequestManager")
