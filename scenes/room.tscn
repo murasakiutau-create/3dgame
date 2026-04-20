@@ -1,6 +1,5 @@
 [gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://scripts/room.gd" id="1_room"]
 [ext_resource type="Script" path="res://scripts/grid_manager.gd" id="2_gm"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
@@ -12,7 +11,6 @@ roughness = 1.0
 shading_mode = 0
 
 [node name="Room" type="Node3D"]
-script = ExtResource("1_room")
 
 [node name="Floor" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 5)
@@ -24,8 +22,3 @@ surface_material_override/0 = SubResource("StdMat_floor")
 [node name="GridManager" type="Node3D" parent="."]
 script = ExtResource("2_gm")
 grid_size = Vector2i(10, 10)
-
-[node name="Light" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.7071, -0.7071, 0, 0.7071, 0.7071, 5, 8, 5)
-light_energy = 1.1
-shadow_enabled = false
