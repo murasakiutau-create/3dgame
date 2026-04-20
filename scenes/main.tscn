@@ -42,7 +42,7 @@ script = ExtResource("4_gm")
 grid_size = Vector2i(10, 10)
 
 [node name="CameraRig" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.5, -0.8660254, 0, 0.8660254, 0.5, 5, 0, 5)
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.8660254, 0, -0.8660254, 0.5, 5, 0, 5)
 script = ExtResource("5_cam")
 
 [node name="Camera3D" type="Camera3D" parent="CameraRig"]
@@ -51,7 +51,7 @@ current = true
 fov = 55.0
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.5, -0.8660254, 0, 0.8660254, 0.5, 5, 10, 8)
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.8660254, 0, -0.8660254, 0.5, 5, 10, 8)
 light_energy = 1.4
 shadow_enabled = false
 
