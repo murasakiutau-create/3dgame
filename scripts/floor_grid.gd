@@ -6,9 +6,9 @@ extends MeshInstance3D
 
 @export var cells: int = 7
 @export var texture_size: int = 512
-@export var line_width: int = 3
+@export var line_width: int = 2
 @export var base_color: Color = Color(0.96, 0.93, 0.7, 1)
-@export var line_color: Color = Color(0.55, 0.45, 0.5, 1)
+@export var line_color: Color = Color(0.82, 0.76, 0.7, 1)
 
 func _ready() -> void:
 	var tex: ImageTexture = _build_grid_texture()
@@ -23,7 +23,7 @@ func _build_grid_texture() -> ImageTexture:
 	var img := Image.create(texture_size, texture_size, false, Image.FORMAT_RGBA8)
 	img.fill(base_color)
 	var step: float = float(texture_size) / float(cells)
-	for i in range(cells + 1):
+	for i in range(1, cells):
 		var p: int = clampi(int(round(i * step)), 0, texture_size - 1)
 		_draw_hline(img, p)
 		_draw_vline(img, p)
