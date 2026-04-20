@@ -28,6 +28,13 @@ size = Vector3(10, 0.2, 10)
 albedo_color = Color(0.96, 0.93, 0.7, 1)
 shading_mode = 0
 
+[sub_resource type="BoxMesh" id="Box_wall"]
+size = Vector3(10, 2, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.7, 0.85, 1, 1)
+shading_mode = 0
+
 [node name="Main" type="Node3D"]
 
 [node name="Ground" type="MeshInstance3D" parent="."]
@@ -39,6 +46,16 @@ surface_material_override/0 = SubResource("Mat_ground")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -5)
 mesh = SubResource("Box_floor")
 surface_material_override/0 = SubResource("Mat_floor")
+
+[node name="WallNorth" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -10)
+mesh = SubResource("Box_wall")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="WallWest" type="MeshInstance3D" parent="."]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -5, 3, -5)
+mesh = SubResource("Box_wall")
+surface_material_override/0 = SubResource("Mat_wall")
 
 [node name="RedSphere" type="MeshInstance3D" parent="."]
 mesh = SubResource("Sphere_test")
