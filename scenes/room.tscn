@@ -1,21 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/grid_manager.gd" id="2_gm"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
-size = Vector2(10, 10)
-
-[sub_resource type="StandardMaterial3D" id="StdMat_floor"]
-albedo_color = Color(0.96, 0.93, 0.88, 1)
-roughness = 1.0
-shading_mode = 0
-
 [node name="Room" type="Node3D"]
-
-[node name="Floor" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 5)
-mesh = SubResource("PlaneMesh_floor")
-surface_material_override/0 = SubResource("StdMat_floor")
 
 [node name="GridLines" type="MeshInstance3D" parent="."]
 
