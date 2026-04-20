@@ -9,6 +9,7 @@ size = Vector2(10, 10)
 [sub_resource type="StandardMaterial3D" id="StdMat_floor"]
 albedo_color = Color(0.96, 0.93, 0.88, 1)
 roughness = 1.0
+shading_mode = 0
 
 [node name="Room" type="Node3D"]
 script = ExtResource("1_room")
@@ -27,4 +28,4 @@ grid_size = Vector2i(10, 10)
 [node name="Light" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.7071, -0.7071, 0, 0.7071, 0.7071, 5, 8, 5)
 light_energy = 1.1
-shadow_enabled = true
+shadow_enabled = false

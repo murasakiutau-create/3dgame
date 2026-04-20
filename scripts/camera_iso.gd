@@ -12,7 +12,8 @@ var _target_yaw: float = 0.0
 
 func _ready() -> void:
 	_target_yaw = rotation.y
-	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.make_current()
+	print("[CameraIso] camera global pos = ", camera.global_transform.origin, " looking at rig origin = ", global_transform.origin)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("camera_rotate_left"):

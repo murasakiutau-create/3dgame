@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room.tscn" id="1_room"]
 [ext_resource type="Script" path="res://scripts/camera_iso.gd" id="2_cam"]
@@ -6,31 +6,21 @@
 [ext_resource type="Script" path="res://scripts/request_manager.gd" id="4_rm"]
 [ext_resource type="PackedScene" path="res://ui/game_ui.tscn" id="5_ui"]
 
-[sub_resource type="Environment" id="Env_default"]
-background_mode = 1
-background_color = Color(0.85, 0.88, 0.95, 1)
-ambient_light_source = 2
-ambient_light_color = Color(1, 1, 1, 1)
-ambient_light_energy = 0.4
-
 [sub_resource type="BoxMesh" id="Box_debug"]
-size = Vector3(1.5, 1.5, 1.5)
+size = Vector3(2, 2, 2)
 
 [sub_resource type="StandardMaterial3D" id="Mat_debug"]
-albedo_color = Color(1, 0.2, 0.3, 1)
+albedo_color = Color(1, 0.15, 0.2, 1)
 shading_mode = 0
 
 [sub_resource type="BoxMesh" id="Box_wall"]
 size = Vector3(10, 2, 0.2)
 
 [sub_resource type="StandardMaterial3D" id="Mat_wall"]
-albedo_color = Color(0.93, 0.85, 0.77, 1)
-roughness = 1.0
+albedo_color = Color(0.3, 0.55, 0.9, 1)
+shading_mode = 0
 
 [node name="Main" type="Node3D"]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Env_default")
 
 [node name="Room" parent="." instance=ExtResource("1_room")]
 
@@ -45,7 +35,7 @@ mesh = SubResource("Box_wall")
 surface_material_override/0 = SubResource("Mat_wall")
 
 [node name="DebugCube" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.75, 5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 5)
 mesh = SubResource("Box_debug")
 surface_material_override/0 = SubResource("Mat_debug")
 
@@ -54,12 +44,11 @@ transform = Transform3D(0.7071068, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, 0.70710
 script = ExtResource("2_cam")
 
 [node name="Camera3D" type="Camera3D" parent="CameraRig"]
-transform = Transform3D(1, 0, 0, 0, 0.7071068, -0.7071068, 0, 0.7071068, 0.7071068, 0, 10, 10)
+transform = Transform3D(1, 0, 0, 0, 0.7071068, -0.7071068, 0, 0.7071068, 0.7071068, 0, 12, 12)
 current = true
-projection = 1
-size = 14.0
+fov = 45.0
 near = 0.1
-far = 100.0
+far = 200.0
 
 [node name="PlacementController" type="Node3D" parent="."]
 script = ExtResource("3_pc")
