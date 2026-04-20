@@ -1,4 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://ui/game_ui.tscn" id="1_ui"]
+[ext_resource type="Script" path="res://scripts/placement_controller.gd" id="2_pc"]
+[ext_resource type="Script" path="res://scripts/request_manager.gd" id="3_rm"]
+[ext_resource type="Script" path="res://scripts/grid_manager.gd" id="4_gm"]
+[ext_resource type="Script" path="res://scripts/camera_iso.gd" id="5_cam"]
 
 [sub_resource type="SphereMesh" id="Sphere_test"]
 radius = 2.0
@@ -15,7 +21,7 @@ size = Vector3(20, 0.2, 20)
 albedo_color = Color(0.2, 0.5, 0.9, 1)
 shading_mode = 0
 
-[node name="TestRender" type="Node3D"]
+[node name="TestWithUI" type="Node3D"]
 
 [node name="Ground" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
@@ -26,7 +32,29 @@ surface_material_override/0 = SubResource("Mat_ground")
 mesh = SubResource("Sphere_test")
 surface_material_override/0 = SubResource("Mat_sphere")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("5_cam")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 10)
 current = true
 fov = 60.0
+
+[node name="GridManager" type="Node3D" parent="."]
+script = ExtResource("4_gm")
+grid_size = Vector2i(10, 10)
+
+[node name="PlacementController" type="Node3D" parent="."]
+script = ExtResource("2_pc")
+items_parent_path = NodePath("Items")
+camera_path = NodePath("../CameraRig")
+grid_manager_path = NodePath("../GridManager")
+
+[node name="Items" type="Node3D" parent="PlacementController"]
+
+[node name="RequestManager" type="Node" parent="."]
+script = ExtResource("3_rm")
+
+[node name="GameUI" parent="." instance=ExtResource("1_ui")]
+placement_path = NodePath("../PlacementController")
+request_manager_path = NodePath("../RequestManager")
