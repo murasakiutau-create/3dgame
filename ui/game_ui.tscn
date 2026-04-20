@@ -1,0 +1,132 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/game_ui.gd" id="1_ui"]
+
+[node name="GameUI" type="CanvasLayer"]
+script = ExtResource("1_ui")
+
+[node name="ClientPanel" type="PanelContainer" parent="."]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 356.0
+offset_bottom = 296.0
+
+[node name="Margin" type="MarginContainer" parent="ClientPanel"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="ClientPanel/Margin"]
+theme_override_constants/separation = 8
+
+[node name="ClientName" type="Label" parent="ClientPanel/Margin/VBox"]
+text = "依頼主："
+theme_override_font_sizes/font_size = 18
+
+[node name="Text" type="RichTextLabel" parent="ClientPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 80)
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = "依頼を読み込み中..."
+
+[node name="ChecklistTitle" type="Label" parent="ClientPanel/Margin/VBox"]
+text = "必要な家具"
+theme_override_font_sizes/font_size = 14
+
+[node name="Checklist" type="VBoxContainer" parent="ClientPanel/Margin/VBox"]
+theme_override_constants/separation = 2
+
+[node name="CatalogPanel" type="PanelContainer" parent="."]
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -276.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -100.0
+
+[node name="Margin" type="MarginContainer" parent="CatalogPanel"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="CatalogPanel/Margin"]
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="CatalogPanel/Margin/VBox"]
+text = "カタログ"
+theme_override_font_sizes/font_size = 18
+
+[node name="List" type="VBoxContainer" parent="CatalogPanel/Margin/VBox"]
+theme_override_constants/separation = 6
+
+[node name="Help" type="Label" parent="CatalogPanel/Margin/VBox"]
+text = "左クリック: 確定 / 掴む
+右クリック・Esc: キャンセル
+R: 回転（Shift で 15°）
+X: 削除
+Shift 押下中: 吸着OFF
+Q / E: 視点回転
+ホイール: ズーム"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
+
+[node name="HUD" type="Control" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -80.0
+offset_right = 260.0
+offset_bottom = -16.0
+mouse_filter = 2
+
+[node name="HBox" type="HBoxContainer" parent="HUD"]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="CompleteBtn" type="Button" parent="HUD/HBox"]
+custom_minimum_size = Vector2(120, 48)
+text = "完成チェック"
+
+[node name="SaveBtn" type="Button" parent="HUD/HBox"]
+custom_minimum_size = Vector2(100, 48)
+text = "保存"
+
+[node name="LoadBtn" type="Button" parent="HUD/HBox"]
+custom_minimum_size = Vector2(100, 48)
+text = "読み込み"
+
+[node name="ClearBtn" type="Button" parent="HUD/HBox"]
+custom_minimum_size = Vector2(100, 48)
+text = "全消去"
+
+[node name="Hint" type="Label" parent="."]
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -40.0
+offset_right = 600.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 14
+text = ""
+
+[node name="ResultDialog" type="AcceptDialog" parent="."]
+title = "完成"
+size = Vector2i(360, 140)
+dialog_text = ""

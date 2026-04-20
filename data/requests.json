@@ -1,0 +1,11 @@
+[
+  {
+    "id": "cozy_bedroom",
+    "client": "うさぎさん",
+    "text": "落ち着ける寝室がほしいな。ベッドと本棚があるとうれしいよ！",
+    "required": [
+      { "id": "bed", "min": 1 },
+      { "id": "bookcase", "min": 1 }
+    ]
+  }
+]

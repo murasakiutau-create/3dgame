@@ -1,0 +1,13 @@
+# Godot 4+ specific ignores
+.godot/
+.import/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Build output
+build/
+
+# User-local settings
+*.local

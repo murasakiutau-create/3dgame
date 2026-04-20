@@ -1,0 +1,23 @@
+[
+  {
+    "id": "bed",
+    "name": "コージーベッド",
+    "scene": "res://scenes/furniture/bed.tscn",
+    "size": [2, 2],
+    "color": "#f5b9c6"
+  },
+  {
+    "id": "bookcase",
+    "name": "パステル本棚",
+    "scene": "res://scenes/furniture/bookcase.tscn",
+    "size": [2, 1],
+    "color": "#c8b8ff"
+  },
+  {
+    "id": "misc",
+    "name": "ミニアイテム",
+    "scene": "res://scenes/furniture/misc.tscn",
+    "size": [1, 1],
+    "color": "#ffe6a7"
+  }
+]
