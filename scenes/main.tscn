@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://ui/game_ui.tscn" id="1_ui"]
 [ext_resource type="Script" path="res://scripts/placement_controller.gd" id="2_pc"]
@@ -20,13 +20,6 @@ size = Vector3(10, 2, 0.2)
 albedo_color = Color(0.7, 0.85, 1, 1)
 shading_mode = 0
 
-[sub_resource type="BoxMesh" id="Box_marker"]
-size = Vector3(1.5, 1.5, 1.5)
-
-[sub_resource type="StandardMaterial3D" id="Mat_marker"]
-albedo_color = Color(1, 0.3, 0.4, 1)
-shading_mode = 0
-
 [node name="Main" type="Node3D"]
 
 [node name="Floor" type="MeshInstance3D" parent="."]
@@ -43,11 +36,6 @@ surface_material_override/0 = SubResource("Mat_wall")
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 5)
 mesh = SubResource("Box_wall")
 surface_material_override/0 = SubResource("Mat_wall")
-
-[node name="CenterMarker" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.75, 5)
-mesh = SubResource("Box_marker")
-surface_material_override/0 = SubResource("Mat_marker")
 
 [node name="GridManager" type="Node3D" parent="."]
 script = ExtResource("4_gm")
