@@ -210,45 +210,35 @@ func _delete_ghost() -> void:
 
 func _try_start_edit() -> void:
 	var mouse: Vector2 = get_viewport().get_mouse_position()
-	var world: Vector3 = _camera.mouse_to_ground(mouse)
-	var clicked_cell: Vector2i = _grid.world_to_cell(world)
+	var cam: Camera3D = _camera.camera
+	var ray_from: Vector3 = cam.project_ray_origin(mouse)
+	var ray_dir: Vector3 = cam.project_ray_normal(mouse)
 	var target: Node3D = null
 	var best_priority: int = -1
-	var best_dist: float = INF
+	var best_t: float = INF
 	for child in _items_parent.get_children():
 		if not (child is Node3D):
 			continue
 		var cid: String = str(child.get_meta("furniture_id", ""))
 		if cid == "":
 			continue
-		var csize: Vector2i = Catalog.get_size(cid)
-		var crot: int = int(fposmod(int(round(child.rotation_degrees.y)), 360))
-		var cw: int = csize.x
-		var ch: int = csize.y
-		if posmod(crot, 180) == 90:
-			cw = csize.y
-			ch = csize.x
-		var cbase: Vector2i
-		if child.has_meta(STACKED_META):
-			cbase = child.get_meta(STACKED_META)
-		else:
-			cbase = Vector2i(
-				int(round(child.position.x - cw * 0.5)),
-				int(round(child.position.z - ch * 0.5))
-			)
-		if clicked_cell.x < cbase.x or clicked_cell.x >= cbase.x + cw:
+		var aabb: AABB = _world_aabb(child)
+		if aabb.size == Vector3.ZERO:
 			continue
-		if clicked_cell.y < cbase.y or clicked_cell.y >= cbase.y + ch:
+		# Expand a tiny bit so very thin rugs still receive the ray.
+		aabb = aabb.grow(0.02)
+		var hit: Variant = aabb.intersects_ray(ray_from, ray_dir)
+		if hit == null:
 			continue
+		var t: float = (hit - ray_from).length()
 		var priority: int = 2
 		if child.has_meta(STACKED_META):
 			priority = 3
 		elif Catalog.get_layer(cid) == "rug":
 			priority = 1
-		var dist: float = Vector2(child.position.x - world.x, child.position.z - world.z).length()
-		if priority > best_priority or (priority == best_priority and dist < best_dist):
+		if priority > best_priority or (priority == best_priority and t < best_t):
 			best_priority = priority
-			best_dist = dist
+			best_t = t
 			target = child
 	if target == null:
 		return
@@ -280,6 +270,28 @@ func _try_start_edit() -> void:
 	_editing_existing = true
 	_apply_ghost_material(_ghost, true)
 	_state = State.PLACING
+
+## Returns the world-space AABB covering every MeshInstance3D under `root`.
+func _world_aabb(root: Node) -> AABB:
+	var out: AABB = AABB()
+	var first: bool = true
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var n = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		if n is MeshInstance3D:
+			var mesh: Mesh = n.mesh
+			if mesh == null:
+				continue
+			var local: AABB = mesh.get_aabb()
+			var world: AABB = n.global_transform * local
+			if first:
+				out = world
+				first = false
+			else:
+				out = out.merge(world)
+	return out
 
 func _cell_from_ghost_position() -> Vector2i:
 	var size: Vector2i = _ghost_size
