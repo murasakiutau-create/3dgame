@@ -211,14 +211,44 @@ func _delete_ghost() -> void:
 func _try_start_edit() -> void:
 	var mouse: Vector2 = get_viewport().get_mouse_position()
 	var world: Vector3 = _camera.mouse_to_ground(mouse)
+	var clicked_cell: Vector2i = _grid.world_to_cell(world)
 	var target: Node3D = null
-	var min_d: float = INF
+	var best_priority: int = -1
+	var best_dist: float = INF
 	for child in _items_parent.get_children():
 		if not (child is Node3D):
 			continue
-		var d: float = Vector2(child.position.x - world.x, child.position.z - world.z).length()
-		if d < min_d and d < 1.5:
-			min_d = d
+		var cid: String = str(child.get_meta("furniture_id", ""))
+		if cid == "":
+			continue
+		var csize: Vector2i = Catalog.get_size(cid)
+		var crot: int = int(fposmod(int(round(child.rotation_degrees.y)), 360))
+		var cw: int = csize.x
+		var ch: int = csize.y
+		if posmod(crot, 180) == 90:
+			cw = csize.y
+			ch = csize.x
+		var cbase: Vector2i
+		if child.has_meta(STACKED_META):
+			cbase = child.get_meta(STACKED_META)
+		else:
+			cbase = Vector2i(
+				int(round(child.position.x - cw * 0.5)),
+				int(round(child.position.z - ch * 0.5))
+			)
+		if clicked_cell.x < cbase.x or clicked_cell.x >= cbase.x + cw:
+			continue
+		if clicked_cell.y < cbase.y or clicked_cell.y >= cbase.y + ch:
+			continue
+		var priority: int = 2
+		if child.has_meta(STACKED_META):
+			priority = 3
+		elif Catalog.get_layer(cid) == "rug":
+			priority = 1
+		var dist: float = Vector2(child.position.x - world.x, child.position.z - world.z).length()
+		if priority > best_priority or (priority == best_priority and dist < best_dist):
+			best_priority = priority
+			best_dist = dist
 			target = child
 	if target == null:
 		return
