@@ -6,7 +6,7 @@ extends CanvasLayer
 @onready var _placement: PlacementController = get_node(placement_path)
 @onready var _requests: RequestManager = get_node(request_manager_path)
 
-@onready var _catalog_list: VBoxContainer = $CatalogPanel/Margin/VBox/List
+@onready var _catalog_list: VBoxContainer = $CatalogPanel/Margin/VBox/Scroll/List
 @onready var _client_text: RichTextLabel = $ClientPanel/Margin/VBox/Text
 @onready var _client_name: Label = $ClientPanel/Margin/VBox/ClientName
 @onready var _checklist: VBoxContainer = $ClientPanel/Margin/VBox/Checklist
@@ -31,7 +31,7 @@ func _populate_catalog() -> void:
 		var btn := Button.new()
 		var size_arr: Array = entry.get("size", [1, 1])
 		btn.text = "%s  (%d×%d)" % [entry.get("name", entry.get("id", "?")), size_arr[0], size_arr[1]]
-		btn.custom_minimum_size = Vector2(220, 36)
+		btn.custom_minimum_size = Vector2(220, 30)
 		var id: String = entry.get("id", "")
 		btn.pressed.connect(_placement.start_placement.bind(id))
 		_catalog_list.add_child(btn)

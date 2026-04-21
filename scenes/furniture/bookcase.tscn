@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="PackedScene" path="res://assets/models/bookcase.glb" id="1_bc"]
+[ext_resource type="PackedScene" path="res://assets/models/Bookshelf.glb" id="1"]
 
-[node name="Bookcase" type="Node3D"]
+[node name="Bookshelf" type="Node3D"]
 
-[node name="Model" parent="." instance=ExtResource("1_bc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+[node name="Model" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

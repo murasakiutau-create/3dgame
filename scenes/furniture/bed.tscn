@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="PackedScene" path="res://assets/models/bed.glb" id="1_bed"]
+[ext_resource type="PackedScene" path="res://assets/models/Cozy_bed.glb" id="1"]
 
 [node name="Bed" type="Node3D"]
 
-[node name="Model" parent="." instance=ExtResource("1_bed")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+[node name="Model" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

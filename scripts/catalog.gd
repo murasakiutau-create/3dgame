@@ -38,3 +38,18 @@ func get_scene_path(id: String) -> String:
 func get_display_name(id: String) -> String:
 	var entry: Dictionary = _by_id.get(id, {})
 	return entry.get("name", id)
+
+## Returns the layer a furniture belongs to: "floor" (default), "rug".
+func get_layer(id: String) -> String:
+	var entry: Dictionary = _by_id.get(id, {})
+	return entry.get("layer", "floor")
+
+## Returns the height (in meters) where 1x1 items can be placed on top of
+## this furniture. 0 means no top surface.
+func get_top_surface_height(id: String) -> float:
+	var entry: Dictionary = _by_id.get(id, {})
+	return float(entry.get("top_surface_height", 0.0))
+
+func get_category(id: String) -> String:
+	var entry: Dictionary = _by_id.get(id, {})
+	return entry.get("category", "")

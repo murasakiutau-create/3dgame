@@ -7,6 +7,9 @@ signal inventory_changed()
 
 enum State { IDLE, PLACING }
 
+const RUG_Y: float = 0.02
+const STACKED_META := "stacked_on_cell"
+
 @export var items_parent_path: NodePath = NodePath("Items")
 @export var camera_path: NodePath
 @export var grid_manager_path: NodePath
@@ -23,6 +26,7 @@ var _ghost_rot_deg: int = 0
 var _editing_existing: bool = false
 var _edit_original_cell: Vector2i = Vector2i.ZERO
 var _edit_original_rot: int = 0
+var _edit_original_stacked_cell: Variant = null
 var _is_snap: bool = true
 
 ## Start placing a brand-new furniture picked from the catalog.
@@ -42,6 +46,7 @@ func start_placement(item_id: String) -> void:
 	_ghost_size = Catalog.get_size(item_id)
 	_ghost_rot_deg = 0
 	_editing_existing = false
+	_edit_original_stacked_cell = null
 	_apply_ghost_material(_ghost, true)
 	_state = State.PLACING
 
@@ -62,8 +67,27 @@ func _process(_delta: float) -> void:
 		_ghost.position = clamped
 		base_cell = _grid.world_to_cell(clamped)
 	_ghost.rotation_degrees.y = float(_ghost_rot_deg)
-	var ok: bool = not _is_snap or _grid.can_place(base_cell, _ghost_size, _ghost_rot_deg, _ghost)
+	# Apply layer-specific Y and placement rules.
+	var layer: String = Catalog.get_layer(_ghost_id)
+	var ok: bool = false
+	if layer == "rug":
+		_ghost.position.y = RUG_Y
+		ok = true
+	else:
+		var can_floor: bool = _grid.can_place(base_cell, _ghost_size, _ghost_rot_deg, _ghost)
+		if can_floor:
+			_ghost.position.y = 0.0
+			ok = true
+		elif _is_1x1() and _grid.stack_height_at(base_cell, _ghost) > 0.0:
+			_ghost.position.y = _grid.stack_height_at(base_cell, _ghost)
+			ok = true
+		else:
+			_ghost.position.y = 0.0
+			ok = not _is_snap
 	_update_ghost_tint(ok)
+
+func _is_1x1() -> bool:
+	return _ghost_size.x == 1 and _ghost_size.y == 1
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _state == State.PLACING:
@@ -77,6 +101,18 @@ func _unhandled_input(event: InputEvent) -> void:
 			var step: int = 15 if Input.is_key_pressed(KEY_SHIFT) else 90
 			_ghost_rot_deg = int(fposmod(_ghost_rot_deg + step, 360))
 			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("rotate_north"):
+			_ghost_rot_deg = 0
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("rotate_east"):
+			_ghost_rot_deg = 90
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("rotate_south"):
+			_ghost_rot_deg = 180
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("rotate_west"):
+			_ghost_rot_deg = 270
+			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("place_delete"):
 			_delete_ghost()
 			get_viewport().set_input_as_handled()
@@ -88,16 +124,37 @@ func _confirm() -> void:
 	if _ghost == null:
 		return
 	var base_cell: Vector2i = _cell_from_ghost_position()
-	if _is_snap and not _grid.can_place(base_cell, _ghost_size, _ghost_rot_deg, _ghost):
-		return
-	if _is_snap:
+	var layer: String = Catalog.get_layer(_ghost_id)
+	var placed_ok: bool = false
+	var stacked_cell: Variant = null
+
+	if layer == "rug":
+		# Rugs don't occupy grid cells, can go anywhere.
+		placed_ok = true
+	elif _grid.can_place(base_cell, _ghost_size, _ghost_rot_deg, _ghost):
 		_grid.place(_ghost, base_cell, _ghost_size, _ghost_rot_deg)
+		placed_ok = true
+	elif _is_1x1() and _grid.stack_height_at(base_cell, _ghost) > 0.0:
+		_grid.place_on_top(_ghost, base_cell)
+		stacked_cell = base_cell
+		placed_ok = true
+
+	if not placed_ok:
+		return
+
+	if stacked_cell != null:
+		_ghost.set_meta(STACKED_META, stacked_cell)
+	else:
+		if _ghost.has_meta(STACKED_META):
+			_ghost.remove_meta(STACKED_META)
+
 	_apply_ghost_material(_ghost, false)
 	var placed: Node3D = _ghost
 	var id: String = _ghost_id
 	_ghost = null
 	_ghost_id = ""
 	_editing_existing = false
+	_edit_original_stacked_cell = null
 	_state = State.IDLE
 	item_placed.emit(id, placed)
 	inventory_changed.emit()
@@ -107,9 +164,23 @@ func _cancel_ghost() -> void:
 		_state = State.IDLE
 		return
 	if _editing_existing:
-		_ghost.position = _grid.cell_to_world_center(_edit_original_cell, _ghost_size, _edit_original_rot)
-		_ghost.rotation_degrees.y = float(_edit_original_rot)
-		_grid.place(_ghost, _edit_original_cell, _ghost_size, _edit_original_rot)
+		var layer: String = Catalog.get_layer(_ghost_id)
+		if layer == "rug":
+			_ghost.position = _grid.cell_to_world_center(_edit_original_cell, _ghost_size, _edit_original_rot)
+			_ghost.position.y = RUG_Y
+			_ghost.rotation_degrees.y = float(_edit_original_rot)
+		elif _edit_original_stacked_cell != null:
+			var c: Vector2i = _edit_original_stacked_cell
+			_ghost.position = _grid.cell_to_world_center(c, _ghost_size, _edit_original_rot)
+			_ghost.position.y = _grid.stack_height_at(c, _ghost)
+			_ghost.rotation_degrees.y = float(_edit_original_rot)
+			_grid.place_on_top(_ghost, c)
+			_ghost.set_meta(STACKED_META, c)
+		else:
+			_ghost.position = _grid.cell_to_world_center(_edit_original_cell, _ghost_size, _edit_original_rot)
+			_ghost.position.y = 0.0
+			_ghost.rotation_degrees.y = float(_edit_original_rot)
+			_grid.place(_ghost, _edit_original_cell, _ghost_size, _edit_original_rot)
 		_apply_ghost_material(_ghost, false)
 	else:
 		if _ghost.get_parent() != null:
@@ -118,6 +189,7 @@ func _cancel_ghost() -> void:
 	_ghost = null
 	_ghost_id = ""
 	_editing_existing = false
+	_edit_original_stacked_cell = null
 	_state = State.IDLE
 
 func _delete_ghost() -> void:
@@ -128,6 +200,7 @@ func _delete_ghost() -> void:
 	_ghost = null
 	_ghost_id = ""
 	_editing_existing = false
+	_edit_original_stacked_cell = null
 	_state = State.IDLE
 	if n.get_parent() != null:
 		n.get_parent().remove_child(n)
@@ -162,7 +235,14 @@ func _try_start_edit() -> void:
 		int(round(target.position.z - h * 0.5))
 	)
 	_edit_original_rot = rot
-	_grid.release(target)
+	var layer: String = Catalog.get_layer(id)
+	if target.has_meta(STACKED_META):
+		_edit_original_stacked_cell = target.get_meta(STACKED_META)
+		_grid.release_top(target)
+	else:
+		_edit_original_stacked_cell = null
+		if layer != "rug":
+			_grid.release(target)
 	_ghost = target
 	_ghost_id = id
 	_ghost_size = size
@@ -223,8 +303,17 @@ func spawn_placed(item_id: String, base_cell: Vector2i, rot_deg: int) -> Node3D:
 	var size: Vector2i = Catalog.get_size(item_id)
 	n.position = _grid.cell_to_world_center(base_cell, size, rot_deg)
 	n.rotation_degrees.y = float(rot_deg)
-	if _grid.can_place(base_cell, size, rot_deg, n):
+	var layer: String = Catalog.get_layer(item_id)
+	if layer == "rug":
+		n.position.y = RUG_Y
+	elif _grid.can_place(base_cell, size, rot_deg, n):
 		_grid.place(n, base_cell, size, rot_deg)
+		n.position.y = 0.0
+	elif size.x == 1 and size.y == 1 and _grid.stack_height_at(base_cell, n) > 0.0:
+		var h: float = _grid.stack_height_at(base_cell, n)
+		_grid.place_on_top(n, base_cell)
+		n.position.y = h
+		n.set_meta(STACKED_META, base_cell)
 	item_placed.emit(item_id, n)
 	inventory_changed.emit()
 	return n

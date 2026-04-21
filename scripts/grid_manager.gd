@@ -5,7 +5,11 @@ const CELL_SIZE: float = 1.0
 
 @export var grid_size: Vector2i = Vector2i(10, 10)
 
+## Floor-layer occupancy (standard furniture).
 var _occupied: Dictionary = {}
+
+## "On-top" layer for 1x1 items sitting on a surface (e.g. lamp on nightstand).
+var _on_top: Dictionary = {}
 
 func world_to_cell(world_pos: Vector3) -> Vector2i:
 	return Vector2i(int(floor(world_pos.x / CELL_SIZE)), int(floor(world_pos.z / CELL_SIZE)))
@@ -60,8 +64,38 @@ func release(item: Node) -> void:
 	for cell in to_remove:
 		_occupied.erase(cell)
 
+## Returns the Y height at which a 1x1 item should sit if stacked on the
+## surface at this cell. 0 if the cell does not have a stackable surface
+## (or the slot is already taken by another item). `ignore` lets the caller
+## pass the node that is being edited so it doesn't block its own slot.
+func stack_height_at(cell: Vector2i, ignore: Node = null) -> float:
+	if not _occupied.has(cell):
+		return 0.0
+	var base_node: Node = _occupied[cell]
+	if base_node == ignore:
+		return 0.0
+	var base_id: String = str(base_node.get_meta("furniture_id", ""))
+	var height: float = Catalog.get_top_surface_height(base_id)
+	if height <= 0.0:
+		return 0.0
+	if _on_top.has(cell) and _on_top[cell] != ignore:
+		return 0.0
+	return height
+
+func place_on_top(item: Node, cell: Vector2i) -> void:
+	_on_top[cell] = item
+
+func release_top(item: Node) -> void:
+	var to_remove: Array = []
+	for cell in _on_top.keys():
+		if _on_top[cell] == item:
+			to_remove.append(cell)
+	for cell in to_remove:
+		_on_top.erase(cell)
+
 func clear_all() -> void:
 	_occupied.clear()
+	_on_top.clear()
 
 func bounds_world_size() -> Vector3:
 	return Vector3(grid_size.x * CELL_SIZE, 0.0, grid_size.y * CELL_SIZE)

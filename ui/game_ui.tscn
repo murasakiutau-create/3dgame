@@ -65,17 +65,25 @@ theme_override_constants/separation = 8
 text = "カタログ"
 theme_override_font_sizes/font_size = 18
 
-[node name="List" type="VBoxContainer" parent="CatalogPanel/Margin/VBox"]
-theme_override_constants/separation = 6
+[node name="Scroll" type="ScrollContainer" parent="CatalogPanel/Margin/VBox"]
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="List" type="VBoxContainer" parent="CatalogPanel/Margin/VBox/Scroll"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
 
 [node name="Help" type="Label" parent="CatalogPanel/Margin/VBox"]
 text = "左クリック: 確定 / 掴む
 右クリック・Esc: キャンセル
-R: 回転（Shift で 15°）
+W/A/S/D: 向きを 北/西/南/東 に
+R: 90° 回転（Shift で 15°）
 X: 削除
 Shift 押下中: 吸着OFF
 Q / E: 視点回転
-ホイール: ズーム"
+ホイール: ズーム
+・ラグの上に家具が置けます
+・ナイトテーブルの上にランプ等 (1×1) が置けます"
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
