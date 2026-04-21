@@ -7,13 +7,30 @@ extends CanvasLayer
 @onready var _requests: RequestManager = get_node(request_manager_path)
 
 @onready var _catalog_list: VBoxContainer = $CatalogPanel/Margin/VBox/Scroll/List
+@onready var _categories_box: HFlowContainer = $CatalogPanel/Margin/VBox/Categories
 @onready var _client_text: RichTextLabel = $ClientPanel/Margin/VBox/Text
 @onready var _client_name: Label = $ClientPanel/Margin/VBox/ClientName
 @onready var _checklist: VBoxContainer = $ClientPanel/Margin/VBox/Checklist
 @onready var _hint: Label = $Hint
 @onready var _result_dialog: AcceptDialog = $ResultDialog
 
+const CATEGORY_LABELS: Dictionary = {
+	"bed": "ベッド",
+	"bookshelf": "本棚",
+	"rug": "ラグ",
+	"lamp": "ランプ",
+	"wardrobe": "ワードローブ",
+	"chair": "チェア",
+	"desk": "デスク",
+	"nightstand": "ナイトテーブル"
+}
+
+const CATEGORY_ORDER: Array = ["bed", "bookshelf", "rug", "lamp", "wardrobe", "chair", "desk", "nightstand"]
+
+var _current_category: String = ""
+
 func _ready() -> void:
+	_populate_categories()
 	_populate_catalog()
 	_requests.request_changed.connect(_on_request_changed)
 	_placement.inventory_changed.connect(_refresh_checklist)
@@ -24,13 +41,39 @@ func _ready() -> void:
 	if _requests.current_request().size() > 0:
 		_on_request_changed(_requests.current_request())
 
+func _populate_categories() -> void:
+	for child in _categories_box.get_children():
+		child.queue_free()
+	var all_btn := Button.new()
+	all_btn.text = "すべて"
+	all_btn.custom_minimum_size = Vector2(0, 28)
+	all_btn.pressed.connect(_on_category_pressed.bind(""))
+	_categories_box.add_child(all_btn)
+	var categories_in_use: Dictionary = {}
+	for entry in Catalog.items:
+		categories_in_use[entry.get("category", "")] = true
+	for cat in CATEGORY_ORDER:
+		if not categories_in_use.has(cat):
+			continue
+		var btn := Button.new()
+		btn.text = CATEGORY_LABELS.get(cat, cat)
+		btn.custom_minimum_size = Vector2(0, 28)
+		btn.pressed.connect(_on_category_pressed.bind(cat))
+		_categories_box.add_child(btn)
+
+func _on_category_pressed(cat: String) -> void:
+	_current_category = cat
+	_populate_catalog()
+
 func _populate_catalog() -> void:
 	for child in _catalog_list.get_children():
 		child.queue_free()
 	for entry in Catalog.items:
+		var cat: String = entry.get("category", "")
+		if _current_category != "" and cat != _current_category:
+			continue
 		var btn := Button.new()
-		var size_arr: Array = entry.get("size", [1, 1])
-		btn.text = "%s  (%d×%d)" % [entry.get("name", entry.get("id", "?")), size_arr[0], size_arr[1]]
+		btn.text = entry.get("name", entry.get("id", "?"))
 		btn.custom_minimum_size = Vector2(220, 30)
 		var id: String = entry.get("id", "")
 		btn.pressed.connect(_placement.start_placement.bind(id))

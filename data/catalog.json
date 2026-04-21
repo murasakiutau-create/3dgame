@@ -1,38 +1,323 @@
 [
-  { "id": "bed",                    "name": "コージーベッド",       "scene": "res://scenes/furniture/bed.tscn",                    "size": [2, 2], "layer": "floor",    "category": "bed" },
-  { "id": "bed_blue",               "name": "ブルーベッド",         "scene": "res://scenes/furniture/bed_blue.tscn",               "size": [2, 2], "layer": "floor",    "category": "bed" },
-  { "id": "bed_pink",               "name": "ピンクベッド",         "scene": "res://scenes/furniture/bed_pink.tscn",               "size": [2, 2], "layer": "floor",    "category": "bed" },
-  { "id": "bed_white",              "name": "ホワイトベッド",       "scene": "res://scenes/furniture/bed_white.tscn",              "size": [2, 2], "layer": "floor",    "category": "bed" },
-
-  { "id": "bookcase",               "name": "本棚",                 "scene": "res://scenes/furniture/bookcase.tscn",               "size": [2, 1], "layer": "floor",    "category": "bookshelf" },
-  { "id": "bookshelf_mini",         "name": "ミニ本棚",             "scene": "res://scenes/furniture/bookshelf_mini.tscn",         "size": [1, 1], "layer": "floor",    "category": "bookshelf" },
-
-  { "id": "rug_round_blue",         "name": "ブルー丸ラグ",         "scene": "res://scenes/furniture/rug_round_blue.tscn",         "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_square_blue",        "name": "ブルー角ラグ",         "scene": "res://scenes/furniture/rug_square_blue.tscn",        "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_heart",              "name": "ハートラグ",           "scene": "res://scenes/furniture/rug_heart.tscn",              "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_round_pink",         "name": "ピンク丸ラグ",         "scene": "res://scenes/furniture/rug_round_pink.tscn",         "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_square_pink",        "name": "ピンク角ラグ",         "scene": "res://scenes/furniture/rug_square_pink.tscn",        "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_rabbit",             "name": "うさぎラグ",           "scene": "res://scenes/furniture/rug_rabbit.tscn",             "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_round_red",          "name": "レッド丸ラグ",         "scene": "res://scenes/furniture/rug_round_red.tscn",          "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_square_red",         "name": "レッド角ラグ",         "scene": "res://scenes/furniture/rug_square_red.tscn",         "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_round_white",        "name": "ホワイト丸ラグ",       "scene": "res://scenes/furniture/rug_round_white.tscn",        "size": [2, 2], "layer": "rug",      "category": "rug" },
-  { "id": "rug_square_white",       "name": "ホワイト角ラグ",       "scene": "res://scenes/furniture/rug_square_white.tscn",       "size": [2, 2], "layer": "rug",      "category": "rug" },
-
-  { "id": "lamp_cute",              "name": "キュートフロアランプ", "scene": "res://scenes/furniture/lamp_cute.tscn",              "size": [1, 1], "layer": "floor",    "category": "lamp" },
-  { "id": "lamp_wood",              "name": "ウッドフロアランプ",   "scene": "res://scenes/furniture/lamp_wood.tscn",              "size": [1, 1], "layer": "floor",    "category": "lamp" },
-
-  { "id": "wardrobe_mini_wood",     "name": "ミニ木製ワードローブ", "scene": "res://scenes/furniture/wardrobe_mini_wood.tscn",     "size": [1, 1], "layer": "floor",    "category": "wardrobe" },
-  { "id": "wardrobe_mini_cute",     "name": "ミニキュートワードローブ","scene": "res://scenes/furniture/wardrobe_mini_cute.tscn",  "size": [1, 1], "layer": "floor",    "category": "wardrobe" },
-  { "id": "wardrobe_white",         "name": "ホワイトワードローブ", "scene": "res://scenes/furniture/wardrobe_white.tscn",         "size": [2, 1], "layer": "floor",    "category": "wardrobe" },
-  { "id": "wardrobe_wood_antique",  "name": "アンティークワードローブ","scene": "res://scenes/furniture/wardrobe_wood_antique.tscn","size": [2, 1], "layer": "floor",    "category": "wardrobe" },
-
-  { "id": "chair_rabbit",           "name": "うさぎチェア",         "scene": "res://scenes/furniture/chair_rabbit.tscn",           "size": [1, 1], "layer": "floor",    "category": "chair" },
-  { "id": "chair_white",            "name": "ホワイトチェア",       "scene": "res://scenes/furniture/chair_white.tscn",            "size": [1, 1], "layer": "floor",    "category": "chair" },
-  { "id": "chair_wood",             "name": "ウッドチェア",         "scene": "res://scenes/furniture/chair_wood.tscn",             "size": [1, 1], "layer": "floor",    "category": "chair" },
-
-  { "id": "desk_white",             "name": "ホワイトデスク",       "scene": "res://scenes/furniture/desk_white.tscn",             "size": [2, 1], "layer": "floor",    "category": "desk" },
-  { "id": "desk_wood",              "name": "ウッドデスク",         "scene": "res://scenes/furniture/desk_wood.tscn",              "size": [2, 1], "layer": "floor",    "category": "desk" },
-
-  { "id": "nightstand_white",       "name": "ホワイトナイトテーブル","scene": "res://scenes/furniture/nightstand_white.tscn",      "size": [1, 1], "layer": "floor",    "category": "nightstand", "top_surface_height": 0.5 },
-  { "id": "nightstand_wood",        "name": "ウッドナイトテーブル", "scene": "res://scenes/furniture/nightstand_wood.tscn",        "size": [1, 1], "layer": "floor",    "category": "nightstand", "top_surface_height": 0.5 }
+  {
+    "id": "bed",
+    "name": "コージーベッド",
+    "scene": "res://scenes/furniture/bed.tscn",
+    "size": [
+      2,
+      2
+    ],
+    "layer": "floor",
+    "category": "bed"
+  },
+  {
+    "id": "bed_blue",
+    "name": "ブルーベッド",
+    "scene": "res://scenes/furniture/bed_blue.tscn",
+    "size": [
+      2,
+      2
+    ],
+    "layer": "floor",
+    "category": "bed"
+  },
+  {
+    "id": "bed_pink",
+    "name": "ピンクベッド",
+    "scene": "res://scenes/furniture/bed_pink.tscn",
+    "size": [
+      2,
+      2
+    ],
+    "layer": "floor",
+    "category": "bed"
+  },
+  {
+    "id": "bed_white",
+    "name": "ホワイトベッド",
+    "scene": "res://scenes/furniture/bed_white.tscn",
+    "size": [
+      2,
+      2
+    ],
+    "layer": "floor",
+    "category": "bed"
+  },
+  {
+    "id": "bookcase",
+    "name": "本棚",
+    "scene": "res://scenes/furniture/bookcase.tscn",
+    "size": [
+      2,
+      1
+    ],
+    "layer": "floor",
+    "category": "bookshelf"
+  },
+  {
+    "id": "bookshelf_mini",
+    "name": "ミニ本棚",
+    "scene": "res://scenes/furniture/bookshelf_mini.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "bookshelf"
+  },
+  {
+    "id": "rug_round_blue",
+    "name": "ブルー丸ラグ",
+    "scene": "res://scenes/furniture/rug_round_blue.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_square_blue",
+    "name": "ブルー角ラグ",
+    "scene": "res://scenes/furniture/rug_square_blue.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_heart",
+    "name": "ハートラグ",
+    "scene": "res://scenes/furniture/rug_heart.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_round_pink",
+    "name": "ピンク丸ラグ",
+    "scene": "res://scenes/furniture/rug_round_pink.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_square_pink",
+    "name": "ピンク角ラグ",
+    "scene": "res://scenes/furniture/rug_square_pink.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_rabbit",
+    "name": "うさぎラグ",
+    "scene": "res://scenes/furniture/rug_rabbit.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_round_red",
+    "name": "レッド丸ラグ",
+    "scene": "res://scenes/furniture/rug_round_red.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_square_red",
+    "name": "レッド角ラグ",
+    "scene": "res://scenes/furniture/rug_square_red.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_round_white",
+    "name": "ホワイト丸ラグ",
+    "scene": "res://scenes/furniture/rug_round_white.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "rug_square_white",
+    "name": "ホワイト角ラグ",
+    "scene": "res://scenes/furniture/rug_square_white.tscn",
+    "size": [
+      4,
+      4
+    ],
+    "layer": "rug",
+    "category": "rug"
+  },
+  {
+    "id": "lamp_cute",
+    "name": "キュートフロアランプ",
+    "scene": "res://scenes/furniture/lamp_cute.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "lamp"
+  },
+  {
+    "id": "lamp_wood",
+    "name": "ウッドフロアランプ",
+    "scene": "res://scenes/furniture/lamp_wood.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "lamp"
+  },
+  {
+    "id": "wardrobe_mini_wood",
+    "name": "ミニ木製ワードローブ",
+    "scene": "res://scenes/furniture/wardrobe_mini_wood.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "wardrobe"
+  },
+  {
+    "id": "wardrobe_mini_cute",
+    "name": "ミニキュートワードローブ",
+    "scene": "res://scenes/furniture/wardrobe_mini_cute.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "wardrobe"
+  },
+  {
+    "id": "wardrobe_white",
+    "name": "ホワイトワードローブ",
+    "scene": "res://scenes/furniture/wardrobe_white.tscn",
+    "size": [
+      2,
+      1
+    ],
+    "layer": "floor",
+    "category": "wardrobe"
+  },
+  {
+    "id": "wardrobe_wood_antique",
+    "name": "アンティークワードローブ",
+    "scene": "res://scenes/furniture/wardrobe_wood_antique.tscn",
+    "size": [
+      2,
+      1
+    ],
+    "layer": "floor",
+    "category": "wardrobe"
+  },
+  {
+    "id": "chair_rabbit",
+    "name": "うさぎチェア",
+    "scene": "res://scenes/furniture/chair_rabbit.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "chair"
+  },
+  {
+    "id": "chair_white",
+    "name": "ホワイトチェア",
+    "scene": "res://scenes/furniture/chair_white.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "chair"
+  },
+  {
+    "id": "chair_wood",
+    "name": "ウッドチェア",
+    "scene": "res://scenes/furniture/chair_wood.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "chair"
+  },
+  {
+    "id": "desk_white",
+    "name": "ホワイトデスク",
+    "scene": "res://scenes/furniture/desk_white.tscn",
+    "size": [
+      2,
+      1
+    ],
+    "layer": "floor",
+    "category": "desk"
+  },
+  {
+    "id": "desk_wood",
+    "name": "ウッドデスク",
+    "scene": "res://scenes/furniture/desk_wood.tscn",
+    "size": [
+      2,
+      1
+    ],
+    "layer": "floor",
+    "category": "desk"
+  },
+  {
+    "id": "nightstand_white",
+    "name": "ホワイトナイトテーブル",
+    "scene": "res://scenes/furniture/nightstand_white.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "nightstand",
+    "top_surface_height": 0.5
+  },
+  {
+    "id": "nightstand_wood",
+    "name": "ウッドナイトテーブル",
+    "scene": "res://scenes/furniture/nightstand_wood.tscn",
+    "size": [
+      1,
+      1
+    ],
+    "layer": "floor",
+    "category": "nightstand",
+    "top_surface_height": 0.5
+  }
 ]
