@@ -5,4 +5,4 @@
 [node name="RugSquarePink" type="Node3D"]
 
 [node name="Model" parent="." instance=ExtResource("1")]
-transform = Transform3D(2.0472, 0, 0, 0, 2.0472, 0, 0, 0, 2.0472, 0, 0.3911, 0)
+transform = Transform3D(2.0472, 0, 0, 0, 0.0795, 0, 0, 0, 2.0472, 0, 0.0152, 0)
