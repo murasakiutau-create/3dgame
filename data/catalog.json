@@ -283,7 +283,8 @@
       1
     ],
     "layer": "floor",
-    "category": "desk"
+    "category": "desk",
+    "top_surface_height": 1.26
   },
   {
     "id": "desk_wood",
@@ -294,7 +295,8 @@
       1
     ],
     "layer": "floor",
-    "category": "desk"
+    "category": "desk",
+    "top_surface_height": 1.0
   },
   {
     "id": "nightstand_white",

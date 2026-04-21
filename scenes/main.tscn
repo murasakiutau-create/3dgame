@@ -9,7 +9,10 @@
 [sub_resource type="Environment" id="Env_default"]
 ambient_light_source = 2
 ambient_light_color = Color(1, 0.98, 0.94, 1)
-ambient_light_energy = 0.6
+ambient_light_energy = 0.55
+tonemap_mode = 2
+tonemap_exposure = 1.0
+tonemap_white = 1.2
 
 [sub_resource type="PlaneMesh" id="Box_floor"]
 size = Vector2(7, 7)
@@ -60,12 +63,12 @@ fov = 55.0
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 3.5, 8, 6)
-light_energy = 1.1
+light_energy = 0.85
 shadow_enabled = false
 
 [node name="Fill" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-1, 0, 0, 0, 0.7071068, -0.7071068, 0, -0.7071068, -0.7071068, 3.5, 8, 1)
-light_energy = 0.5
+light_energy = 0.4
 light_color = Color(1, 0.95, 0.85, 1)
 shadow_enabled = false
 
