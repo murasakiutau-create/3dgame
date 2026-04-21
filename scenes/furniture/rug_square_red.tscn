@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="PackedScene" path="res://assets/models/Red_square_rug.glb" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/Red_square_Rug.glb" id="1"]
 
 [node name="RugSquareRed" type="Node3D"]
 
 [node name="Model" parent="." instance=ExtResource("1")]
-transform = Transform3D(2.0714, 0, 0, 0, 2.0714, 0, 0, 0, 2.0714, 0, 0.5553, 0)
+transform = Transform3D(3.8674, 0, 0, 0, 3.8674, 0, 0, 0, 3.8674, 0, 0.5291, 0)
