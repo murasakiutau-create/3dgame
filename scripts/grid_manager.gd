@@ -11,6 +11,10 @@ var _occupied: Dictionary = {}
 ## "On-top" layer for 1x1 items sitting on a surface (e.g. lamp on nightstand).
 var _on_top: Dictionary = {}
 
+## Rug occupancy. Rugs never block placement but tracking them lets us
+## lift other furniture so it doesn't visually sink through the rug.
+var _rug_at: Dictionary = {}
+
 func world_to_cell(world_pos: Vector3) -> Vector2i:
 	return Vector2i(int(floor(world_pos.x / CELL_SIZE)), int(floor(world_pos.z / CELL_SIZE)))
 
@@ -93,9 +97,29 @@ func release_top(item: Node) -> void:
 	for cell in to_remove:
 		_on_top.erase(cell)
 
+## Register rug footprint so floor items on top can be lifted.
+func place_rug(item: Node, base_cell: Vector2i, size: Vector2i, rot_deg: int) -> void:
+	for cell in cells_for_item(base_cell, size, rot_deg):
+		_rug_at[cell] = item
+
+func release_rug(item: Node) -> void:
+	var to_remove: Array = []
+	for cell in _rug_at.keys():
+		if _rug_at[cell] == item:
+			to_remove.append(cell)
+	for cell in to_remove:
+		_rug_at.erase(cell)
+
+func has_rug_in_area(base_cell: Vector2i, size: Vector2i, rot_deg: int) -> bool:
+	for cell in cells_for_item(base_cell, size, rot_deg):
+		if _rug_at.has(cell):
+			return true
+	return false
+
 func clear_all() -> void:
 	_occupied.clear()
 	_on_top.clear()
+	_rug_at.clear()
 
 func bounds_world_size() -> Vector3:
 	return Vector3(grid_size.x * CELL_SIZE, 0.0, grid_size.y * CELL_SIZE)

@@ -5,4 +5,4 @@
 [node name="RugHeart" type="Node3D"]
 
 [node name="Model" parent="." instance=ExtResource("1")]
-transform = Transform3D(1.9851, 0, 0, 0, 1.9851, 0, 0, 0, 1.9851, 0, 0.2633, 0)
+transform = Transform3D(1.9851, 0, 0, 0, 0.1152, 0, 0, 0, 1.9851, 0, 0.0153, 0)
