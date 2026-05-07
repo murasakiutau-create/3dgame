@@ -412,6 +412,31 @@
   }
   .stash-item .status.hidden { color: #b8a; }
 
+  /* Square shooting frame (visible in shoot & room) */
+  .sq-frame {
+    position: absolute;
+    pointer-events: none;
+    z-index: 3;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,.45);
+    outline: 2px solid rgba(255,255,255,.65);
+    transition: opacity .2s;
+  }
+
+  /* My-room floating shutter */
+  .room-shutter {
+    position: absolute;
+    bottom: max(env(safe-area-inset-bottom), 18px);
+    left: 50%; transform: translateX(-50%);
+    width: 70px; height: 70px; border-radius: 50%;
+    background: #fff;
+    border: 4px solid rgba(255,255,255,.5);
+    box-shadow: 0 0 0 4px rgba(0,0,0,.25), 0 6px 20px rgba(0,0,0,.5);
+    z-index: 5;
+    cursor: pointer;
+  }
+  .room-shutter:active { transform: translateX(-50%) scale(.94); }
+  .room-edit-bar.show ~ .room-shutter { display: none; }
+
   /* small screens: shrink illustration on short displays */
   @media (max-height: 640px) {
     .camera-illust { width: 100px; height: 70px; margin: 8px auto 16px; }
@@ -483,6 +508,7 @@
     <div id="shoot-canvas-wrap">
       <canvas id="shoot-canvas"></canvas>
     </div>
+    <div class="sq-frame" id="shoot-sq-frame"></div>
     <div class="grid-overlay" id="grid-overlay"><span></span><span></span></div>
     <div class="shoot-top">
       <button class="icon-btn" id="shoot-back" style="background: rgba(255,255,255,.85)">←</button>
@@ -561,13 +587,15 @@
     <div id="room-canvas-wrap" style="position:absolute; inset:0;">
       <canvas id="room-canvas" style="width:100%; height:100%; display:block; touch-action:none;"></canvas>
     </div>
+    <div class="sq-frame" id="room-sq-frame"></div>
     <div class="shoot-top">
       <button class="icon-btn" id="room-back" style="background: rgba(255,255,255,.85)">←</button>
       <div class="title"><b>マイルーム</b><span id="room-stat"></span></div>
       <button class="icon-btn" id="room-stash" style="background: rgba(255,255,255,.85)" title="家具リスト">📦</button>
       <button class="icon-btn" id="room-reset" style="background: rgba(255,255,255,.85)" title="配置をリセット">⟲</button>
     </div>
-    <div class="room-help" id="room-help">家具をタップ→ドラッグで自由に配置できます</div>
+    <div class="room-help" id="room-help">家具をダブルタップ→ドラッグで配置できます</div>
+    <button class="room-shutter" id="room-shutter" aria-label="撮影"></button>
     <div class="room-edit-bar" id="room-edit-bar">
       <button class="room-edit-btn" id="btn-rot-l">↺ 回転</button>
       <button class="room-edit-btn" id="btn-stash">📦 しまう</button>
@@ -584,6 +612,22 @@
       <button class="icon-btn" id="stash-close">×</button>
     </div>
     <div class="modal-body" id="stash-body"></div>
+  </div>
+</div>
+
+<div class="modal" id="photo-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="photo-title">📸 マイルーム</h3>
+      <button class="icon-btn" id="photo-close">×</button>
+    </div>
+    <div class="modal-body" style="text-align:center">
+      <div class="photo-frame" style="transform:none">
+        <img id="photo-img" alt="">
+        <div class="photo-caption" id="photo-caption">MY ROOM</div>
+      </div>
+      <a class="btn" id="photo-save" download="myroom.png" style="margin-top:8px">画像を保存</a>
+    </div>
   </div>
 </div>
 
@@ -830,6 +874,37 @@ function toast(msg) {
   toastT = setTimeout(() => toastEl.classList.remove('show'), 1800);
 }
 
+// ---------- Square capture helpers ----------
+function applySquareFrame(frameEl, refEl) {
+  const w = refEl.clientWidth;
+  const h = refEl.clientHeight;
+  const sq = Math.min(w, h);
+  frameEl.style.width = sq + 'px';
+  frameEl.style.height = sq + 'px';
+  frameEl.style.left = ((w - sq) / 2) + 'px';
+  frameEl.style.top = ((h - sq) / 2) + 'px';
+}
+function captureSquareDataURL(canvasEl) {
+  const w = canvasEl.width;
+  const h = canvasEl.height;
+  const sq = Math.min(w, h);
+  const offX = (w - sq) / 2;
+  const offY = (h - sq) / 2;
+  const out = document.createElement('canvas');
+  out.width = sq; out.height = sq;
+  const ctx = out.getContext('2d');
+  // Cream paper background (visible inside thin frame margin)
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, sq, sq);
+  const m = Math.round(sq * 0.018);
+  ctx.drawImage(canvasEl, offX, offY, sq, sq, m, m, sq - m * 2, sq - m * 2);
+  // Subtle inner border
+  ctx.strokeStyle = 'rgba(0,0,0,.06)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(m + 0.5, m + 0.5, sq - m * 2 - 1, sq - m * 2 - 1);
+  return out.toDataURL('image/png');
+}
+
 // ---------- Stash modal ----------
 function openStashModal({ title, items, onToggle }) {
   const modal = document.getElementById('stash-modal');
@@ -868,6 +943,22 @@ document.getElementById('stash-close').addEventListener('click', () => {
 });
 document.getElementById('stash-modal').addEventListener('click', (e) => {
   if (e.target.id === 'stash-modal') e.target.classList.remove('show');
+});
+
+// Photo preview modal (My Room shots)
+function showRoomPhoto(dataUrl) {
+  document.getElementById('photo-img').src = dataUrl;
+  const link = document.getElementById('photo-save');
+  link.href = dataUrl;
+  link.download = 'roomgraph_' + Date.now() + '.png';
+  document.getElementById('photo-caption').textContent = 'MY ROOM  ' + new Date().toLocaleDateString('ja-JP');
+  document.getElementById('photo-modal').classList.add('show');
+}
+document.getElementById('photo-close').addEventListener('click', () => {
+  document.getElementById('photo-modal').classList.remove('show');
+});
+document.getElementById('photo-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'photo-modal') e.target.classList.remove('show');
 });
 
 // ---------- Requests List ----------
@@ -1083,11 +1174,13 @@ async function startShoot(request) {
   });
 
   // Resize
+  const sqFrame = document.getElementById('shoot-sq-frame');
   function resize() {
     const r = canvas.getBoundingClientRect();
     renderer.setSize(r.width, r.height, false);
     camera.aspect = r.width / r.height;
     camera.updateProjectionMatrix();
+    applySquareFrame(sqFrame, canvas);
   }
   resize();
   currentShoot.resize = resize;
@@ -1105,7 +1198,7 @@ async function startShoot(request) {
   try {
     const isPractice = request.id === 'practice';
     const ids = isPractice
-      ? state.owned.slice()
+      ? ['bed']
       : [...new Set([...request.required, ...(request.optional || [])])];
     const placements = layoutPositions(ids.length);
     for (let i = 0; i < ids.length; i++) {
@@ -1122,7 +1215,7 @@ async function startShoot(request) {
       : request.required.map(id => currentShoot.furnitures[id]).filter(Boolean));
     frameTo(focusObjs);
     document.getElementById('shoot-loader').style.display = 'none';
-    document.getElementById('shoot-stash').style.display = isPractice ? 'inline-flex' : 'none';
+    document.getElementById('shoot-stash').style.display = 'none';
     attachShootEditor(canvas, camera, controls);
   } catch (e) {
     console.error(e);
@@ -1171,14 +1264,14 @@ document.getElementById('hint-btn').addEventListener('click', () => {
 });
 document.getElementById('shoot-back').addEventListener('click', () => show('home'));
 
-// Shutter (hides selection ring during capture)
+// Shutter (square capture, hides selection ring during capture)
 document.getElementById('shutter').addEventListener('click', () => {
   if (!currentShoot.renderer) return;
   const ring = currentShoot.ring;
   const ringWasVisible = ring && ring.visible;
   if (ring) ring.visible = false;
   currentShoot.renderer.render(currentShoot.scene, currentShoot.camera);
-  const dataUrl = currentShoot.renderer.domElement.toDataURL('image/png');
+  const dataUrl = captureSquareDataURL(currentShoot.renderer.domElement);
   if (ring && ringWasVisible) ring.visible = true;
   const evalResult = evaluateShot();
   showResult(dataUrl, evalResult);
@@ -1200,8 +1293,7 @@ function attachShootEditor(canvas, camera, controls) {
   const editBar = document.getElementById('shoot-edit-bar');
   let selected = null;
   let isDragging = false;
-  let startedOnFurniture = false;
-  let touchStart = { x: 0, y: 0, t: 0 };
+  let lastTap = { time: 0, x: 0, y: 0 };
 
   function ndc(e) {
     const r = canvas.getBoundingClientRect();
@@ -1249,27 +1341,37 @@ function attachShootEditor(canvas, camera, controls) {
 
   function onPointerDown(e) {
     if (e.pointerType === 'touch' && e.isPrimary === false) return;
+    const now = Date.now();
+    const dx = Math.abs(e.clientX - lastTap.x);
+    const dy = Math.abs(e.clientY - lastTap.y);
+    const dt = now - lastTap.time;
+    const isDouble = lastTap.time > 0 && dt < 350 && dx < 30 && dy < 30;
+    if (!isDouble) {
+      lastTap = { time: now, x: e.clientX, y: e.clientY };
+      return; // pass to OrbitControls for single-tap orbit
+    }
+    lastTap = { time: 0, x: 0, y: 0 };
     const m = ndc(e);
     raycaster.setFromCamera(m, camera);
     const hits = raycaster.intersectObjects(visibleRoots(), true);
-    touchStart = { x: e.clientX, y: e.clientY, t: Date.now() };
-    if (hits.length) {
-      const root = findRoot(hits[0].object);
-      if (root) {
-        selectObj(root);
-        const hp = new THREE.Vector3();
-        if (raycaster.ray.intersectPlane(dragPlane, hp)) {
-          dragOffset.set(root.position.x - hp.x, 0, root.position.z - hp.z);
-        }
-        isDragging = true;
-        startedOnFurniture = true;
-        controls.enabled = false;
-        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    if (!hits.length) {
+      if (selected) {
+        deselectObj();
         e.stopImmediatePropagation();
-        return;
       }
+      return;
     }
-    startedOnFurniture = false;
+    const root = findRoot(hits[0].object);
+    if (!root) return;
+    selectObj(root);
+    const hp = new THREE.Vector3();
+    if (raycaster.ray.intersectPlane(dragPlane, hp)) {
+      dragOffset.set(root.position.x - hp.x, 0, root.position.z - hp.z);
+    }
+    isDragging = true;
+    controls.enabled = false;
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    e.stopImmediatePropagation();
   }
   function onPointerMove(e) {
     if (!isDragging || !selected) return;
@@ -1286,18 +1388,6 @@ function attachShootEditor(canvas, camera, controls) {
     if (isDragging) {
       isDragging = false;
       controls.enabled = true;
-      return;
-    }
-    if (!startedOnFurniture) {
-      const dx = e.clientX - touchStart.x;
-      const dy = e.clientY - touchStart.y;
-      const dt = Date.now() - touchStart.t;
-      if (Math.hypot(dx, dy) < 6 && dt < 300 && selected) {
-        const m = ndc(e);
-        raycaster.setFromCamera(m, camera);
-        const hits = raycaster.intersectObjects(visibleRoots(), true);
-        if (!hits.length) deselectObj();
-      }
     }
   }
   canvas.addEventListener('pointerdown', onPointerDown, true);
@@ -1397,6 +1487,14 @@ function evaluateShot() {
   cam.updateMatrixWorld();
   cam.updateProjectionMatrix();
 
+  // Square-frame remap: project to canvas NDC, then scale so the captured
+  // square spans [-1, 1] for both axes.
+  const cw = currentShoot.renderer.domElement.width;
+  const ch = currentShoot.renderer.domElement.height;
+  const sq = Math.min(cw, ch);
+  const xScale = cw / sq;
+  const yScale = ch / sq;
+
   // Per-required-object metrics
   const objs = req.required.map(id => currentShoot.furnitures[id]).filter(Boolean);
   if (!objs.length) return null;
@@ -1414,6 +1512,7 @@ function evaluateShot() {
       for (const y of [b.min.y, b.max.y])
         for (const z of [b.min.z, b.max.z]) {
           const v = new THREE.Vector3(x, y, z).project(cam);
+          v.x *= xScale; v.y *= yScale;
           corners.push(v);
         }
     const inFront = corners.every(c => c.z > -1 && c.z < 1);
@@ -1675,15 +1774,17 @@ async function openRoom() {
   document.getElementById('room-stat').textContent = ' / 所持家具 ' + owned.length + '点';
   const helpEl = document.getElementById('room-help');
   const barEl = document.getElementById('room-edit-bar');
-  helpEl.textContent = '家具をタップ→ドラッグで自由に配置できます';
+  helpEl.textContent = '家具をダブルタップ→ドラッグで配置できます';
   barEl.classList.remove('show');
 
   // Resize
+  const sqFrame = document.getElementById('room-sq-frame');
   function resize() {
     const r = canvas.getBoundingClientRect();
     renderer.setSize(r.width, r.height, false);
     camera.aspect = r.width / r.height;
     camera.updateProjectionMatrix();
+    applySquareFrame(sqFrame, canvas);
   }
   resize();
   window.addEventListener('resize', resize);
@@ -1695,8 +1796,7 @@ async function openRoom() {
   const dragOffset = new THREE.Vector3();
   let selected = null;
   let isDragging = false;
-  let startedOnFurniture = false;
-  let touchStart = { x: 0, y: 0, t: 0 };
+  let lastTap = { time: 0, x: 0, y: 0 };
 
   function ndc(e) {
     const r = canvas.getBoundingClientRect();
@@ -1731,7 +1831,7 @@ async function openRoom() {
     selected = null;
     ring.visible = false;
     barEl.classList.remove('show');
-    helpEl.textContent = '家具をタップ→ドラッグで自由に配置できます';
+    helpEl.textContent = '家具をダブルタップ→ドラッグで配置できます';
   }
   function saveLayout() {
     const layout = {};
@@ -1749,27 +1849,37 @@ async function openRoom() {
   function visibleRoots() { return furnitureRoots.filter(r => r.visible); }
   function onPointerDown(e) {
     if (e.pointerType === 'touch' && e.isPrimary === false) return;
+    const now = Date.now();
+    const dx = Math.abs(e.clientX - lastTap.x);
+    const dy = Math.abs(e.clientY - lastTap.y);
+    const dt = now - lastTap.time;
+    const isDouble = lastTap.time > 0 && dt < 350 && dx < 30 && dy < 30;
+    if (!isDouble) {
+      lastTap = { time: now, x: e.clientX, y: e.clientY };
+      return;
+    }
+    lastTap = { time: 0, x: 0, y: 0 };
     const m = ndc(e);
     raycaster.setFromCamera(m, camera);
     const hits = raycaster.intersectObjects(visibleRoots(), true);
-    touchStart = { x: e.clientX, y: e.clientY, t: Date.now() };
-    if (hits.length) {
-      const root = findRoot(hits[0].object);
-      if (root) {
-        selectObj(root);
-        const hp = new THREE.Vector3();
-        if (raycaster.ray.intersectPlane(dragPlane, hp)) {
-          dragOffset.set(root.position.x - hp.x, 0, root.position.z - hp.z);
-        }
-        isDragging = true;
-        startedOnFurniture = true;
-        controls.enabled = false;
-        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    if (!hits.length) {
+      if (selected) {
+        deselectObj();
         e.stopImmediatePropagation();
-        return;
       }
+      return;
     }
-    startedOnFurniture = false;
+    const root = findRoot(hits[0].object);
+    if (!root) return;
+    selectObj(root);
+    const hp = new THREE.Vector3();
+    if (raycaster.ray.intersectPlane(dragPlane, hp)) {
+      dragOffset.set(root.position.x - hp.x, 0, root.position.z - hp.z);
+    }
+    isDragging = true;
+    controls.enabled = false;
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    e.stopImmediatePropagation();
   }
   function onPointerMove(e) {
     if (!isDragging || !selected) return;
@@ -1787,18 +1897,6 @@ async function openRoom() {
       isDragging = false;
       controls.enabled = true;
       saveLayout();
-      return;
-    }
-    if (!startedOnFurniture) {
-      const dx = e.clientX - touchStart.x;
-      const dy = e.clientY - touchStart.y;
-      const dt = Date.now() - touchStart.t;
-      if (Math.hypot(dx, dy) < 6 && dt < 300 && selected) {
-        const m = ndc(e);
-        raycaster.setFromCamera(m, camera);
-        const hits = raycaster.intersectObjects(visibleRoots(), true);
-        if (!hits.length) deselectObj();
-      }
     }
   }
   canvas.addEventListener('pointerdown', onPointerDown, true);
@@ -1851,6 +1949,15 @@ async function openRoom() {
     saveState();
     closeRoom();
     openRoom();
+  };
+
+  document.getElementById('room-shutter').onclick = () => {
+    const ringWasVisible = ring.visible;
+    ring.visible = false;
+    renderer.render(scene, camera);
+    const dataUrl = captureSquareDataURL(renderer.domElement);
+    if (ringWasVisible) ring.visible = true;
+    showRoomPhoto(dataUrl);
   };
 
   currentRoom.listeners = {
