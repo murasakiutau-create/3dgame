@@ -1121,8 +1121,33 @@ function renderShop() {
 // ---------- GLB cache ----------
 const loader = new GLTFLoader();
 const glbCache = {};
+function fixMaterialColorSpaces(mat) {
+  if (!mat) return;
+  // Color textures need sRGB; data textures (normal/roughness/etc) stay linear
+  if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace;
+  if (mat.emissiveMap) mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+  if (mat.specularColorMap) mat.specularColorMap.colorSpace = THREE.SRGBColorSpace;
+  if (mat.sheenColorMap) mat.sheenColorMap.colorSpace = THREE.SRGBColorSpace;
+}
+function cloneFurniture(rootProto) {
+  // Deep-clone materials so each instance is independent across scenes/renderers
+  const clone = rootProto.clone(true);
+  const matCache = new Map();
+  clone.traverse(n => {
+    if (!n.isMesh || !n.material) return;
+    const cloneOne = (m) => {
+      if (matCache.has(m)) return matCache.get(m);
+      const c = m.clone();
+      fixMaterialColorSpaces(c);
+      matCache.set(m, c);
+      return c;
+    };
+    n.material = Array.isArray(n.material) ? n.material.map(cloneOne) : cloneOne(n.material);
+  });
+  return clone;
+}
 function loadFurniture(id) {
-  if (glbCache[id]) return Promise.resolve(glbCache[id].clone(true));
+  if (glbCache[id]) return Promise.resolve(cloneFurniture(glbCache[id]));
   const f = FURNITURES[id];
   return new Promise((resolve, reject) => {
     loader.load(f.file, gltf => {
@@ -1141,11 +1166,11 @@ function loadFurniture(id) {
         if (n.isMesh) {
           n.castShadow = true;
           n.receiveShadow = true;
-          if (n.material && n.material.map) n.material.map.colorSpace = THREE.SRGBColorSpace;
+          fixMaterialColorSpaces(n.material);
         }
       });
       glbCache[id] = root;
-      resolve(root.clone(true));
+      resolve(cloneFurniture(root));
     }, undefined, err => reject(err));
   });
 }
