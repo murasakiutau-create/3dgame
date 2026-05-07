@@ -412,6 +412,38 @@
   }
   .stash-item .status.hidden { color: #b8a; }
 
+  /* Shop preview modal */
+  .preview-stage {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: linear-gradient(135deg, #ffeef4, #fff);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 6px;
+    box-shadow: inset 0 0 0 1px #f3dfe8;
+  }
+  .preview-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  .preview-info {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 4px 6px;
+  }
+  .preview-name { font-weight: 800; font-size: 16px; color: var(--ink); }
+  .preview-price { color: var(--gold); font-weight: 800; font-size: 16px; }
+  .preview-hint { text-align: center; color: var(--ink-soft); font-size: 11px; margin: 6px 0 0; }
+  .shop-card .thumb {
+    cursor: pointer;
+    position: relative;
+  }
+  .shop-card .thumb::after {
+    content: "👀 タップで見る";
+    position: absolute; left: 50%; bottom: 6px;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,.92);
+    color: var(--pink-dark); font-size: 9px; font-weight: 800;
+    padding: 2px 8px; border-radius: 999px;
+    white-space: nowrap;
+  }
+
   /* Square shooting frame (visible in shoot & room) */
   .sq-frame {
     position: absolute;
@@ -615,6 +647,26 @@
   </div>
 </div>
 
+<div class="modal" id="preview-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="preview-title">家具プレビュー</h3>
+      <button class="icon-btn" id="preview-close">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:0">
+      <div class="preview-stage">
+        <canvas id="preview-canvas"></canvas>
+      </div>
+      <p class="preview-hint">指でクルクル回せます／2本指でズーム</p>
+      <div class="preview-info">
+        <div class="preview-name" id="preview-name"></div>
+        <div class="preview-price" id="preview-price"></div>
+      </div>
+      <button class="btn" id="preview-buy">購入する</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="photo-modal">
   <div class="modal-card">
     <div class="modal-head">
@@ -694,11 +746,6 @@ const FURNITURES = {
     file: 'Pink_White_kitchen_Cabinet.glb',
     price: 320, targetSize: 2.0, tags: ['kitchen', 'pink'],
   },
-  lamp: {
-    id: 'lamp', name: 'リボンランプ', emo: '💡',
-    file: 'Red_ribbon_lamp.glb',
-    price: 110, targetSize: 1.0, tags: ['light', 'red'],
-  },
   dresser: {
     id: 'dresser', name: 'ホワイトドレッサー', emo: '💄',
     file: 'White_dresser.glb',
@@ -744,11 +791,6 @@ const FURNITURES = {
     file: 'Wood_drawer_Cabinet.glb',
     price: 220, targetSize: 1.4, tags: ['storage'],
   },
-  nightstand: {
-    id: 'nightstand', name: 'ナイトスタンド', emo: '🌙',
-    file: 'Wood_nightstand.glb',
-    price: 150, targetSize: 1.0, tags: ['bedroom'],
-  },
   pink_chair: {
     id: 'pink_chair', name: 'ピンクチェア', emo: '🪑',
     file: 'Wood_pink_chair.glb',
@@ -782,7 +824,7 @@ const FURNITURES = {
 };
 
 // Refund table for furniture removed in updates
-const REMOVED_FURNITURES = { bookcase: 220, mystery: 160 };
+const REMOVED_FURNITURES = { bookcase: 220, mystery: 160, nightstand: 150, lamp: 110 };
 
 const SCENES = {
   studio: {
@@ -838,15 +880,15 @@ const REQUESTS = [
   },
   {
     id: 'q4', client: 'ご新居さん', title: 'ベッドルームコーディネート',
-    desc: 'ベッドとナイトスタンドとドレッサーで、朝の寝室をお願い。',
-    required: ['bed', 'nightstand', 'dresser'], optional: [], preferredScene: 'morning',
-    reward: 280, hint: 'ナイトスタンドはベッドの脇に。引きで全体を捉えて。',
+    desc: 'ベッドとドレッサーとウッドチェストで、朝の寝室をお願い。',
+    required: ['bed', 'dresser', 'wood_drawer'], optional: [], preferredScene: 'morning',
+    reward: 280, hint: 'ベッドを主役に、収納家具は左右に振って。',
   },
   {
     id: 'q5', client: 'カフェオーナー', title: 'リビングのソファ特集',
-    desc: 'ブルーソファとリボンランプ、ラウンドテーブルでくつろぐ夕暮れを。',
-    required: ['sofa', 'lamp', 'round_table'], optional: [], preferredScene: 'evening',
-    reward: 320, hint: '夕暮れシーンで斜めから。ランプがアクセント。',
+    desc: 'ブルーソファとラウンドテーブルでくつろぐ夕暮れを。',
+    required: ['sofa', 'round_table'], optional: [], preferredScene: 'evening',
+    reward: 280, hint: '夕暮れシーンで斜めから。ソファが主役。',
   },
   {
     id: 'q6', client: '料理研究家', title: '朝のキッチン',
@@ -879,10 +921,10 @@ const REQUESTS = [
     reward: 260, hint: '同系色同士、距離感に気をつけて。',
   },
   {
-    id: 'q11', client: '夜のショーウィンドウ', title: 'ランプ単体ナイトショット',
-    desc: 'リボンランプを夜の雰囲気で。',
-    required: ['lamp'], optional: [], preferredScene: 'night',
-    reward: 130, hint: '夜シーンで、ライトを少し落としてムードを。',
+    id: 'q11', client: '夜のショーウィンドウ', title: 'ドレッサーをナイトショットで',
+    desc: 'ホワイトドレッサーを夜の雰囲気で。',
+    required: ['dresser'], optional: [], preferredScene: 'night',
+    reward: 150, hint: '夜シーンで、ライトを少し落としてムードを。',
   },
   {
     id: 'q12', client: '工房レトロ', title: 'カラフルキッチンを一枚で',
@@ -1100,6 +1142,7 @@ function renderShop() {
       <div class="name">${f.name}</div>
       <div class="price">${owned ? '所持済' : f.price + ' G'}</div>
     `;
+    card.querySelector('.thumb').addEventListener('click', () => openPreview(f.id));
     const btn = document.createElement('button');
     btn.className = 'btn tiny';
     btn.textContent = owned ? '所持中' : '購入';
@@ -1117,6 +1160,130 @@ function renderShop() {
     grid.appendChild(card);
   });
 }
+
+// ---------- Shop preview (3D viewer) ----------
+const previewState = { renderer: null, scene: null, camera: null, controls: null, raf: null, resize: null, obj: null };
+
+async function openPreview(id) {
+  const f = FURNITURES[id];
+  if (!f) return;
+  document.getElementById('preview-title').textContent = f.emo + ' ' + f.name;
+  document.getElementById('preview-name').textContent = f.name;
+  const owned = state.owned.includes(id);
+  const buyBtn = document.getElementById('preview-buy');
+  if (owned) {
+    buyBtn.textContent = '所持済';
+    buyBtn.disabled = true;
+    document.getElementById('preview-price').textContent = '所持中';
+  } else {
+    buyBtn.textContent = `${f.price} G で購入`;
+    buyBtn.disabled = state.gold < f.price;
+    document.getElementById('preview-price').textContent = f.price + ' G';
+  }
+  buyBtn.onclick = () => {
+    if (state.gold < f.price) { toast('ゴールドが足りないよ'); return; }
+    if (state.owned.includes(id)) return;
+    state.gold -= f.price;
+    state.owned.push(id);
+    saveState();
+    refreshGold();
+    renderShop();
+    toast(`${f.name} をお迎えしたよ！`);
+    closePreview();
+  };
+  document.getElementById('preview-modal').classList.add('show');
+
+  // Tear down any prior preview
+  if (previewState.renderer) {
+    if (previewState.raf) cancelAnimationFrame(previewState.raf);
+    if (previewState.resize) window.removeEventListener('resize', previewState.resize);
+    previewState.renderer.dispose();
+  }
+
+  const canvas = document.getElementById('preview-canvas');
+  const renderer = setupRenderer(canvas);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xfff3ec);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.minDistance = 1.2;
+  controls.maxDistance = 8;
+  controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xeeeeee, 1.0));
+  const dir = new THREE.DirectionalLight(0xffffff, 1.6);
+  dir.position.set(3, 5, 3);
+  scene.add(dir);
+
+  const floor = new THREE.Mesh(
+    new THREE.CircleGeometry(6, 36),
+    new THREE.MeshStandardMaterial({ color: 0xfff5e8, roughness: 0.95 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  scene.add(floor);
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    if (!r.width) return;
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let auto = true;
+  controls.addEventListener('start', () => { auto = false; });
+
+  Object.assign(previewState, { renderer, scene, camera, controls, resize, obj: null });
+
+  function tick() {
+    if (auto && previewState.obj) previewState.obj.rotation.y += 0.005;
+    controls.update();
+    renderer.render(scene, camera);
+    previewState.raf = requestAnimationFrame(tick);
+  }
+  tick();
+
+  try {
+    const obj = await loadFurniture(id);
+    if (!previewState.renderer || previewState.scene !== scene) return; // closed/replaced
+    scene.add(obj);
+    const box = new THREE.Box3().setFromObject(obj);
+    const sz = new THREE.Vector3(); box.getSize(sz);
+    const cn = new THREE.Vector3(); box.getCenter(cn);
+    const dist = Math.max(sz.x, sz.y, sz.z) * 1.9;
+    camera.position.set(cn.x + dist * 0.7, cn.y + sz.y * 0.4, cn.z + dist);
+    controls.target.copy(cn);
+    controls.update();
+    previewState.obj = obj;
+    // Resize once more after layout settle
+    setTimeout(resize, 0);
+  } catch (e) {
+    console.error(e);
+    toast('読み込みに失敗しました');
+  }
+}
+
+function closePreview() {
+  if (previewState.raf) cancelAnimationFrame(previewState.raf);
+  if (previewState.resize) window.removeEventListener('resize', previewState.resize);
+  if (previewState.renderer) previewState.renderer.dispose();
+  document.getElementById('preview-modal').classList.remove('show');
+  previewState.renderer = null;
+  previewState.scene = null;
+  previewState.camera = null;
+  previewState.controls = null;
+  previewState.raf = null;
+  previewState.resize = null;
+  previewState.obj = null;
+}
+document.getElementById('preview-close').addEventListener('click', closePreview);
+document.getElementById('preview-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'preview-modal') closePreview();
+});
 
 // ---------- GLB cache ----------
 const loader = new GLTFLoader();
