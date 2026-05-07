@@ -12,6 +12,9 @@ class_name CameraIso
 @export var dist_max: float = 18.0
 @export var dist_step: float = 0.6
 
+@export var key_orbit_speed: float = 1.6   # rad/sec (arrow keys)
+@export var key_zoom_speed: float = 4.0    # m/sec ([ / ] keys)
+
 const PITCH_MIN: float = -PI * 0.5 + 0.05    # almost looking straight down
 const PITCH_MAX: float = -0.05               # just above horizontal
 
@@ -28,6 +31,32 @@ func _ready() -> void:
 	camera.make_current()
 	_saved_rig_transform = transform
 	_saved_camera_transform = camera.transform
+
+func _process(delta: float) -> void:
+	# Keyboard alternatives for trackpad / no-mouse users.
+	var dx: float = 0.0
+	var dy: float = 0.0
+	if Input.is_key_pressed(KEY_LEFT):
+		dx -= 1.0
+	if Input.is_key_pressed(KEY_RIGHT):
+		dx += 1.0
+	if Input.is_key_pressed(KEY_UP):
+		dy -= 1.0
+	if Input.is_key_pressed(KEY_DOWN):
+		dy += 1.0
+	if dx != 0.0 or dy != 0.0:
+		rotation.y -= dx * key_orbit_speed * delta
+		rotation.x = clamp(rotation.x - dy * key_orbit_speed * delta, PITCH_MIN, PITCH_MAX)
+		_target_yaw = rotation.y
+	var dz: float = 0.0
+	if Input.is_key_pressed(KEY_BRACKETLEFT):
+		dz += 1.0   # [ → 引く（遠ざかる）
+	if Input.is_key_pressed(KEY_BRACKETRIGHT):
+		dz -= 1.0   # ] → 寄る（近づく）
+	if dz != 0.0:
+		var p: Vector3 = camera.position
+		p.z = clamp(p.z + dz * key_zoom_speed * delta, dist_min, dist_max)
+		camera.position = p
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
