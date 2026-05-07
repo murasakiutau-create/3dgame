@@ -8,7 +8,11 @@
       2
     ],
     "layer": "floor",
-    "category": "bed"
+    "category": "bed",
+    "tags": [
+      "cozy"
+    ],
+    "price": 0
   },
   {
     "id": "bed_blue",
@@ -19,7 +23,11 @@
       2
     ],
     "layer": "floor",
-    "category": "bed"
+    "category": "bed",
+    "tags": [
+      "blue"
+    ],
+    "price": 350
   },
   {
     "id": "bed_pink",
@@ -30,7 +38,11 @@
       2
     ],
     "layer": "floor",
-    "category": "bed"
+    "category": "bed",
+    "tags": [
+      "pink"
+    ],
+    "price": 350
   },
   {
     "id": "bed_white",
@@ -41,7 +53,11 @@
       2
     ],
     "layer": "floor",
-    "category": "bed"
+    "category": "bed",
+    "tags": [
+      "white"
+    ],
+    "price": 350
   },
   {
     "id": "bookcase",
@@ -52,7 +68,11 @@
       1
     ],
     "layer": "floor",
-    "category": "bookshelf"
+    "category": "bookshelf",
+    "tags": [
+      "neutral"
+    ],
+    "price": 0
   },
   {
     "id": "bookshelf_mini",
@@ -63,7 +83,11 @@
       1
     ],
     "layer": "floor",
-    "category": "bookshelf"
+    "category": "bookshelf",
+    "tags": [
+      "mini"
+    ],
+    "price": 150
   },
   {
     "id": "rug_round_blue",
@@ -74,7 +98,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "blue"
+    ],
+    "price": 180
   },
   {
     "id": "rug_square_blue",
@@ -85,7 +113,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "blue"
+    ],
+    "price": 180
   },
   {
     "id": "rug_heart",
@@ -96,7 +128,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "cute"
+    ],
+    "price": 180
   },
   {
     "id": "rug_round_pink",
@@ -107,7 +143,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "pink"
+    ],
+    "price": 180
   },
   {
     "id": "rug_square_pink",
@@ -118,7 +158,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "pink"
+    ],
+    "price": 180
   },
   {
     "id": "rug_rabbit",
@@ -129,7 +173,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "cute"
+    ],
+    "price": 180
   },
   {
     "id": "rug_round_red",
@@ -140,7 +188,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "red"
+    ],
+    "price": 180
   },
   {
     "id": "rug_square_red",
@@ -151,7 +203,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "red"
+    ],
+    "price": 180
   },
   {
     "id": "rug_round_white",
@@ -162,7 +218,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "white"
+    ],
+    "price": 180
   },
   {
     "id": "rug_square_white",
@@ -173,7 +233,11 @@
       4
     ],
     "layer": "rug",
-    "category": "rug"
+    "category": "rug",
+    "tags": [
+      "white"
+    ],
+    "price": 180
   },
   {
     "id": "lamp_cute",
@@ -184,7 +248,11 @@
       1
     ],
     "layer": "floor",
-    "category": "lamp"
+    "category": "lamp",
+    "tags": [
+      "cute"
+    ],
+    "price": 150
   },
   {
     "id": "lamp_wood",
@@ -195,7 +263,11 @@
       1
     ],
     "layer": "floor",
-    "category": "lamp"
+    "category": "lamp",
+    "tags": [
+      "wood"
+    ],
+    "price": 0
   },
   {
     "id": "wardrobe_mini_wood",
@@ -206,7 +278,12 @@
       1
     ],
     "layer": "floor",
-    "category": "wardrobe"
+    "category": "wardrobe",
+    "tags": [
+      "wood",
+      "mini"
+    ],
+    "price": 180
   },
   {
     "id": "wardrobe_mini_cute",
@@ -217,7 +294,12 @@
       1
     ],
     "layer": "floor",
-    "category": "wardrobe"
+    "category": "wardrobe",
+    "tags": [
+      "cute",
+      "mini"
+    ],
+    "price": 180
   },
   {
     "id": "wardrobe_white",
@@ -228,7 +310,11 @@
       1
     ],
     "layer": "floor",
-    "category": "wardrobe"
+    "category": "wardrobe",
+    "tags": [
+      "white"
+    ],
+    "price": 300
   },
   {
     "id": "wardrobe_wood_antique",
@@ -239,7 +325,12 @@
       1
     ],
     "layer": "floor",
-    "category": "wardrobe"
+    "category": "wardrobe",
+    "tags": [
+      "wood",
+      "antique"
+    ],
+    "price": 300
   },
   {
     "id": "chair_rabbit",
@@ -250,7 +341,11 @@
       1
     ],
     "layer": "floor",
-    "category": "chair"
+    "category": "chair",
+    "tags": [
+      "cute"
+    ],
+    "price": 120
   },
   {
     "id": "chair_white",
@@ -261,7 +356,11 @@
       1
     ],
     "layer": "floor",
-    "category": "chair"
+    "category": "chair",
+    "tags": [
+      "white"
+    ],
+    "price": 0
   },
   {
     "id": "chair_wood",
@@ -272,7 +371,11 @@
       1
     ],
     "layer": "floor",
-    "category": "chair"
+    "category": "chair",
+    "tags": [
+      "wood"
+    ],
+    "price": 120
   },
   {
     "id": "desk_white",
@@ -284,7 +387,11 @@
     ],
     "layer": "floor",
     "category": "desk",
-    "top_surface_height": 1.26
+    "top_surface_height": 1.26,
+    "tags": [
+      "white"
+    ],
+    "price": 280
   },
   {
     "id": "desk_wood",
@@ -296,7 +403,11 @@
     ],
     "layer": "floor",
     "category": "desk",
-    "top_surface_height": 1.0
+    "top_surface_height": 1.0,
+    "tags": [
+      "wood"
+    ],
+    "price": 280
   },
   {
     "id": "nightstand_white",
@@ -308,7 +419,11 @@
     ],
     "layer": "floor",
     "category": "nightstand",
-    "top_surface_height": 0.75
+    "top_surface_height": 0.75,
+    "tags": [
+      "white"
+    ],
+    "price": 160
   },
   {
     "id": "nightstand_wood",
@@ -320,6 +435,10 @@
     ],
     "layer": "floor",
     "category": "nightstand",
-    "top_surface_height": 0.87
+    "top_surface_height": 0.87,
+    "tags": [
+      "wood"
+    ],
+    "price": 0
   }
 ]

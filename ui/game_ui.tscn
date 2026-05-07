@@ -5,15 +5,55 @@
 [node name="GameUI" type="CanvasLayer"]
 script = ExtResource("1_ui")
 
+[node name="TopBar" type="PanelContainer" parent="."]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 56.0
+
+[node name="Margin" type="MarginContainer" parent="TopBar"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
+theme_override_constants/separation = 12
+
+[node name="GoldLabel" type="Label" parent="TopBar/Margin/HBox"]
+text = "💰 0 G"
+theme_override_font_sizes/font_size = 16
+
+[node name="Spacer" type="Control" parent="TopBar/Margin/HBox"]
+size_flags_horizontal = 3
+
+[node name="ClientBtn" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(110, 32)
+toggle_mode = true
+text = "依頼"
+
+[node name="OwnBtn" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(120, 32)
+toggle_mode = true
+text = "自分の部屋"
+
+[node name="ShopBtn" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(110, 32)
+text = "ショップ"
+
 [node name="ClientPanel" type="PanelContainer" parent="."]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 16.0
-offset_top = 16.0
-offset_right = 356.0
-offset_bottom = 296.0
+offset_top = 72.0
+offset_right = 376.0
+offset_bottom = 360.0
 
 [node name="Margin" type="MarginContainer" parent="ClientPanel"]
 theme_override_constants/margin_left = 12
@@ -35,12 +75,16 @@ fit_content = true
 scroll_active = false
 text = "依頼を読み込み中..."
 
-[node name="ChecklistTitle" type="Label" parent="ClientPanel/Margin/VBox"]
-text = "必要な家具"
+[node name="PhaseHeader" type="Label" parent="ClientPanel/Margin/VBox"]
+text = ""
 theme_override_font_sizes/font_size = 14
 
 [node name="Checklist" type="VBoxContainer" parent="ClientPanel/Margin/VBox"]
 theme_override_constants/separation = 2
+
+[node name="ActionBtn" type="Button" parent="ClientPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 36)
+text = "撮影開始"
 
 [node name="CatalogPanel" type="PanelContainer" parent="."]
 anchor_left = 1.0
@@ -48,7 +92,7 @@ anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -276.0
-offset_top = 16.0
+offset_top = 72.0
 offset_right = -16.0
 offset_bottom = -100.0
 
@@ -81,13 +125,9 @@ theme_override_constants/separation = 4
 text = "左クリック: 確定 / 掴む
 右クリック・Esc: キャンセル
 W/A/S/D: 向きを 北/西/南/東 に
-R: 90° 回転（Shift で 15°）
-X: 削除
-Shift 押下中: 吸着OFF
-Q / E: 視点回転
-ホイール: ズーム
-・ラグの上に家具が置けます
-・ナイトテーブルの上にランプ等 (1×1) が置けます"
+R: 90° 回転 / X: 削除
+Shift: 吸着OFF
+Q / E: 視点回転 / ホイール: ズーム"
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
@@ -109,10 +149,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/separation = 12
 alignment = 1
-
-[node name="CompleteBtn" type="Button" parent="HUD/HBox"]
-custom_minimum_size = Vector2(120, 48)
-text = "完成チェック"
 
 [node name="SaveBtn" type="Button" parent="HUD/HBox"]
 custom_minimum_size = Vector2(100, 48)
@@ -138,12 +174,57 @@ anchor_right = 0.0
 anchor_bottom = 1.0
 offset_left = 16.0
 offset_top = -40.0
-offset_right = 600.0
+offset_right = 700.0
 offset_bottom = -16.0
 theme_override_font_sizes/font_size = 14
 text = ""
 
 [node name="ResultDialog" type="AcceptDialog" parent="."]
 title = "完成"
-size = Vector2i(360, 140)
+size = Vector2i(360, 200)
 dialog_text = ""
+
+[node name="ShopOverlay" type="Panel" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -240.0
+offset_right = 300.0
+offset_bottom = 240.0
+
+[node name="Margin" type="MarginContainer" parent="ShopOverlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="ShopOverlay/Margin"]
+theme_override_constants/separation = 8
+
+[node name="HeaderBox" type="HBoxContainer" parent="ShopOverlay/Margin/VBox"]
+
+[node name="Title" type="Label" parent="ShopOverlay/Margin/VBox/HeaderBox"]
+size_flags_horizontal = 3
+text = "🛒 ショップ"
+theme_override_font_sizes/font_size = 20
+
+[node name="CloseBtn" type="Button" parent="ShopOverlay/Margin/VBox/HeaderBox"]
+custom_minimum_size = Vector2(80, 32)
+text = "閉じる"
+
+[node name="ShopGold" type="Label" parent="ShopOverlay/Margin/VBox"]
+text = "💰 0 G"
+theme_override_font_sizes/font_size = 14
+
+[node name="Scroll" type="ScrollContainer" parent="ShopOverlay/Margin/VBox"]
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="List" type="VBoxContainer" parent="ShopOverlay/Margin/VBox/Scroll"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 4

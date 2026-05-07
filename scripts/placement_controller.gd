@@ -30,6 +30,10 @@ var _edit_original_rot: int = 0
 var _edit_original_stacked_cell: Variant = null
 var _is_snap: bool = true
 var _view_mode: bool = false
+var _focused_id: String = ""
+
+func get_focused_id() -> String:
+	return _focused_id
 
 ## Called by UI to switch between build mode (default) and view/zoom mode.
 func set_view_mode(active: bool) -> void:
@@ -39,6 +43,7 @@ func set_view_mode(active: bool) -> void:
 	if active:
 		_cancel_ghost()
 	else:
+		_focused_id = ""
 		_camera.reset_view()
 
 func is_view_mode() -> bool:
@@ -47,8 +52,10 @@ func is_view_mode() -> bool:
 func _try_focus_on_clicked() -> void:
 	var t: Node3D = _find_item_under_mouse()
 	if t == null:
+		_focused_id = ""
 		_camera.reset_view()
 		return
+	_focused_id = str(t.get_meta("furniture_id", ""))
 	_camera.focus_on(t)
 
 func _find_item_under_mouse() -> Node3D:

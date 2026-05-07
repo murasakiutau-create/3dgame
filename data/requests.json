@@ -1,11 +1,41 @@
 [
   {
-    "id": "cozy_bedroom",
+    "id": "pink_bedroom",
     "client": "うさぎさん",
-    "text": "落ち着ける寝室がほしいな。ベッドと本棚があるとうれしいよ！",
-    "required": [
-      { "id": "bed", "min": 1 },
-      { "id": "bookcase", "min": 1 }
-    ]
+    "text": "ピンクのかわいい寝室を撮って！",
+    "theme": "pink",
+    "single_shot_targets": [
+      { "id": "bed_pink", "label": "ピンクのベッド" },
+      { "id": "rug_round_pink", "label": "ピンクの丸ラグ" }
+    ],
+    "preferred_categories": ["bed", "rug", "lamp", "nightstand"],
+    "preferred_tags": ["pink", "cute"],
+    "base_reward": 100
+  },
+  {
+    "id": "wood_study",
+    "client": "ふくろうさん",
+    "text": "木のぬくもりがある書斎を撮ってホー",
+    "theme": "wood",
+    "single_shot_targets": [
+      { "id": "desk_wood", "label": "ウッドデスク" },
+      { "id": "chair_wood", "label": "ウッドチェア" }
+    ],
+    "preferred_categories": ["desk", "chair", "bookshelf", "lamp"],
+    "preferred_tags": ["wood", "antique"],
+    "base_reward": 120
+  },
+  {
+    "id": "white_minimal",
+    "client": "しろくまさん",
+    "text": "ホワイトでまとめたミニマルな部屋がいいな",
+    "theme": "white",
+    "single_shot_targets": [
+      { "id": "bed_white", "label": "ホワイトベッド" },
+      { "id": "wardrobe_white", "label": "ホワイトワードローブ" }
+    ],
+    "preferred_categories": ["bed", "wardrobe", "rug", "chair"],
+    "preferred_tags": ["white"],
+    "base_reward": 110
   }
 ]

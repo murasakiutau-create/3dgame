@@ -53,3 +53,24 @@ func get_top_surface_height(id: String) -> float:
 func get_category(id: String) -> String:
 	var entry: Dictionary = _by_id.get(id, {})
 	return entry.get("category", "")
+
+func get_tags(id: String) -> Array:
+	var entry: Dictionary = _by_id.get(id, {})
+	return entry.get("tags", [])
+
+func has_tag(id: String, tag: String) -> bool:
+	for t in get_tags(id):
+		if String(t) == tag:
+			return true
+	return false
+
+func get_price(id: String) -> int:
+	var entry: Dictionary = _by_id.get(id, {})
+	return int(entry.get("price", 0))
+
+func items_for_sale() -> Array:
+	var arr: Array = []
+	for entry in items:
+		if int(entry.get("price", 0)) > 0:
+			arr.append(entry)
+	return arr

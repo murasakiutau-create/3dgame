@@ -18,6 +18,9 @@ config/icon="res://icon.svg"
 
 Catalog="*res://scripts/catalog.gd"
 Save="*res://scripts/save_system.gd"
+Wallet="*res://scripts/wallet.gd"
+Inventory="*res://scripts/inventory.gd"
+GameMode="*res://scripts/game_mode.gd"
 
 [display]
 

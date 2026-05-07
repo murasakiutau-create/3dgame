@@ -1,24 +1,29 @@
 extends Node
 
-const SAVE_PATH := "user://layout.json"
 const SAVE_VERSION := 1
 
-func save_layout(placement: PlacementController) -> bool:
+func slot_path(slot: String) -> String:
+	return "user://layout_%s.json" % slot
+
+func save_layout(placement: PlacementController, slot: String = "own") -> bool:
+	var path: String = slot_path(slot)
 	var data: Dictionary = {
 		"version": SAVE_VERSION,
 		"items": placement.get_placed_snapshot()
 	}
-	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
-		push_error("Cannot open %s for write." % SAVE_PATH)
+		push_error("Cannot open %s for write." % path)
 		return false
 	f.store_string(JSON.stringify(data, "\t"))
 	return true
 
-func load_layout(placement: PlacementController) -> bool:
-	if not FileAccess.file_exists(SAVE_PATH):
+func load_layout(placement: PlacementController, slot: String = "own") -> bool:
+	var path: String = slot_path(slot)
+	if not FileAccess.file_exists(path):
+		placement.clear_all()
 		return false
-	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null:
 		return false
 	var parsed: Variant = JSON.parse_string(f.get_as_text())
@@ -33,5 +38,5 @@ func load_layout(placement: PlacementController) -> bool:
 		placement.spawn_placed(id, Vector2i(int(cell_arr[0]), int(cell_arr[1])), rot)
 	return true
 
-func has_save() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+func has_save(slot: String = "own") -> bool:
+	return FileAccess.file_exists(slot_path(slot))
