@@ -38,6 +38,7 @@ func _ready() -> void:
 	$HUD/HBox/SaveBtn.pressed.connect(_on_save_pressed)
 	$HUD/HBox/LoadBtn.pressed.connect(_on_load_pressed)
 	$HUD/HBox/ClearBtn.pressed.connect(_on_clear_pressed)
+	$HUD/HBox/ViewBtn.toggled.connect(_on_view_toggled)
 	if _requests.current_request().size() > 0:
 		_on_request_changed(_requests.current_request())
 
@@ -120,3 +121,8 @@ func _on_load_pressed() -> void:
 func _on_clear_pressed() -> void:
 	_placement.clear_all()
 	_hint.text = "全て削除しました"
+
+func _on_view_toggled(active: bool) -> void:
+	_placement.set_view_mode(active)
+	$HUD/HBox/ViewBtn.text = "編集に戻る" if active else "鑑賞モード"
+	_hint.text = "クリックで家具にズームイン（右クリック / Esc で戻る）" if active else ""

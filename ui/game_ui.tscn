@@ -122,6 +122,11 @@ text = "保存"
 custom_minimum_size = Vector2(100, 48)
 text = "読み込み"
 
+[node name="ViewBtn" type="Button" parent="HUD/HBox"]
+custom_minimum_size = Vector2(120, 48)
+toggle_mode = true
+text = "鑑賞モード"
+
 [node name="ClearBtn" type="Button" parent="HUD/HBox"]
 custom_minimum_size = Vector2(100, 48)
 text = "全消去"

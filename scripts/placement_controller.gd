@@ -29,6 +29,71 @@ var _edit_original_cell: Vector2i = Vector2i.ZERO
 var _edit_original_rot: int = 0
 var _edit_original_stacked_cell: Variant = null
 var _is_snap: bool = true
+var _view_mode: bool = false
+
+## Called by UI to switch between build mode (default) and view/zoom mode.
+func set_view_mode(active: bool) -> void:
+	if _view_mode == active:
+		return
+	_view_mode = active
+	if active:
+		_cancel_ghost()
+	else:
+		_camera.reset_view()
+
+func is_view_mode() -> bool:
+	return _view_mode
+
+func _try_focus_on_clicked() -> void:
+	var t: Node3D = _find_item_under_mouse()
+	if t == null:
+		_camera.reset_view()
+		return
+	_camera.focus_on(t)
+
+func _find_item_under_mouse() -> Node3D:
+	var mouse: Vector2 = get_viewport().get_mouse_position()
+	var world: Vector3 = _camera.mouse_to_ground(mouse)
+	var clicked_cell: Vector2i = _grid.world_to_cell(world)
+	var target: Node3D = null
+	var best_priority: int = -1
+	var best_dist: float = INF
+	for child in _items_parent.get_children():
+		if not (child is Node3D):
+			continue
+		var cid: String = str(child.get_meta("furniture_id", ""))
+		if cid == "":
+			continue
+		var csize: Vector2i = Catalog.get_size(cid)
+		var crot: int = int(fposmod(int(round(child.rotation_degrees.y)), 360))
+		var cw: int = csize.x
+		var ch: int = csize.y
+		if posmod(crot, 180) == 90:
+			cw = csize.y
+			ch = csize.x
+		var cbase: Vector2i
+		if child.has_meta(STACKED_META):
+			cbase = child.get_meta(STACKED_META)
+		else:
+			cbase = Vector2i(
+				int(round(child.position.x - cw * 0.5)),
+				int(round(child.position.z - ch * 0.5))
+			)
+		if clicked_cell.x < cbase.x or clicked_cell.x >= cbase.x + cw:
+			continue
+		if clicked_cell.y < cbase.y or clicked_cell.y >= cbase.y + ch:
+			continue
+		var priority: int = 2
+		if child.has_meta(STACKED_META):
+			priority = 3
+		elif Catalog.get_layer(cid) == "rug":
+			priority = 1
+		var dist: float = Vector2(child.position.x - world.x, child.position.z - world.z).length()
+		if priority > best_priority or (priority == best_priority and dist < best_dist):
+			best_priority = priority
+			best_dist = dist
+			target = child
+	return target
 
 ## Start placing a brand-new furniture picked from the catalog.
 func start_placement(item_id: String) -> void:
@@ -118,8 +183,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			_delete_ghost()
 			get_viewport().set_input_as_handled()
 	else:
-		if event.is_action_pressed("place_confirm"):
-			_try_start_edit()
+		if _view_mode:
+			if event.is_action_pressed("place_confirm"):
+				_try_focus_on_clicked()
+			elif event.is_action_pressed("place_cancel"):
+				_camera.reset_view()
+		else:
+			if event.is_action_pressed("place_confirm"):
+				_try_start_edit()
 
 func _confirm() -> void:
 	if _ghost == null:
