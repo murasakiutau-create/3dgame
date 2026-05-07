@@ -632,6 +632,16 @@ const FURNITURES = {
     floorOffset: 0,
     tags: ['decor'],
   },
+  cabinet: {
+    id: 'cabinet',
+    name: 'ウッデンキャビネット',
+    file: 'Wooden_Cabinet.glb',
+    emo: '🗄',
+    price: 200,
+    targetSize: 1.6,
+    floorOffset: 0,
+    tags: ['storage', 'wooden'],
+  },
 };
 
 const SCENES = {
@@ -722,6 +732,28 @@ const REQUESTS = [
     preferredScene: 'evening',
     reward: 240,
     hint: '夕暮れシーンで光を斜めから当ててみて。',
+  },
+  {
+    id: 'r6',
+    client: '蚤の市の店主',
+    title: 'ウッデンキャビネットを撮って',
+    desc: '木の温もりが伝わる、ナチュラルな雰囲気で撮ってほしいの。',
+    required: ['cabinet'],
+    optional: [],
+    preferredScene: 'natural',
+    reward: 140,
+    hint: '少し離れて全体を入れて。光は柔らかく、斜めから当てると木目が映えるよ。',
+  },
+  {
+    id: 'r7',
+    client: 'インテリア雑誌「shio」',
+    title: '本棚×キャビネットの収納特集',
+    desc: '収納家具を並べて、暮らしの一角をオシャレに切り取って。',
+    required: ['bookcase', 'cabinet'],
+    optional: [],
+    preferredScene: 'morning',
+    reward: 260,
+    hint: '背の高さが違う家具をバランスよく。引き気味のアングルで。',
   },
 ];
 
