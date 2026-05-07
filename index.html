@@ -1297,19 +1297,45 @@ function fixMaterialColorSpaces(mat) {
   if (mat.sheenColorMap) mat.sheenColorMap.colorSpace = THREE.SRGBColorSpace;
 }
 function cloneFurniture(rootProto) {
-  // Deep-clone materials so each instance is independent across scenes/renderers
+  // Deep-clone materials AND textures so each instance is fully independent
+  // across scenes/renderers. Sharing textures across renderers can cause
+  // corrupted uploads when one renderer is disposed and another is created
+  // (which happens when toggling room visibility or moving between scenes).
   const clone = rootProto.clone(true);
   const matCache = new Map();
+  const texCache = new Map();
+  function cloneTex(t) {
+    if (!t) return t;
+    if (texCache.has(t)) return texCache.get(t);
+    const c = t.clone();
+    c.needsUpdate = true; // force fresh GL upload in this scene's renderer
+    texCache.set(t, c);
+    return c;
+  }
+  function cloneMat(m) {
+    if (matCache.has(m)) return matCache.get(m);
+    const c = m.clone();
+    // Replace every texture slot with an independent clone (image is still shared)
+    [
+      'map', 'normalMap', 'roughnessMap', 'metalnessMap',
+      'emissiveMap', 'aoMap', 'alphaMap', 'bumpMap',
+      'displacementMap', 'envMap', 'lightMap',
+      'specularMap', 'specularColorMap', 'specularIntensityMap',
+      'sheenColorMap', 'sheenRoughnessMap', 'clearcoatMap',
+      'clearcoatNormalMap', 'clearcoatRoughnessMap',
+      'iridescenceMap', 'iridescenceThicknessMap',
+      'transmissionMap', 'thicknessMap',
+    ].forEach(key => {
+      if (c[key]) c[key] = cloneTex(c[key]);
+    });
+    fixMaterialColorSpaces(c);
+    c.needsUpdate = true;
+    matCache.set(m, c);
+    return c;
+  }
   clone.traverse(n => {
     if (!n.isMesh || !n.material) return;
-    const cloneOne = (m) => {
-      if (matCache.has(m)) return matCache.get(m);
-      const c = m.clone();
-      fixMaterialColorSpaces(c);
-      matCache.set(m, c);
-      return c;
-    };
-    n.material = Array.isArray(n.material) ? n.material.map(cloneOne) : cloneOne(n.material);
+    n.material = Array.isArray(n.material) ? n.material.map(cloneMat) : cloneMat(n.material);
   });
   return clone;
 }
