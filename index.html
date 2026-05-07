@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffe4ec">
+<title>お写ん歩スタジオ｜家具フォトゲーム</title>
+<style>
+  :root {
+    --pink: #ff7aa2;
+    --pink-light: #ffe4ec;
+    --pink-dark: #c94e7a;
+    --cream: #fff7f0;
+    --ink: #3a2230;
+    --ink-soft: #6b4f5c;
+    --gold: #e2a93b;
+    --shadow: 0 6px 20px rgba(60, 30, 60, .14);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  #app {
+    position: fixed; inset: 0;
+    overflow: hidden;
+  }
+  .screen {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    background: var(--cream);
+    overflow: hidden;
+  }
+  .screen.active { display: flex; }
+
+  /* Top bar */
+  .topbar {
+    position: relative;
+    display: flex; align-items: center; gap: 8px;
+    padding: max(env(safe-area-inset-top), 12px) 14px 10px 14px;
+    background: linear-gradient(180deg, var(--pink-light), transparent);
+    z-index: 10;
+  }
+  .topbar h1 { font-size: 18px; margin: 0; flex: 1; text-align: center; color: var(--pink-dark); font-weight: 800; }
+  .gold-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid #f5d2c7;
+    border-radius: 999px; padding: 6px 12px;
+    font-weight: 800; color: var(--gold);
+    box-shadow: var(--shadow);
+  }
+  .gold-chip::before {
+    content: ""; width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffe27a, #c98c0c);
+    box-shadow: 0 0 0 1px #b87a09 inset;
+  }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: #fff; border: 1px solid #f5d2c7;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--ink);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .icon-btn:active { transform: scale(.94); }
+
+  .content { flex: 1; min-height: 0; overflow: auto; padding: 8px 14px 24px; -webkit-overflow-scrolling: touch; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 20px;
+    background: var(--pink);
+    color: #fff;
+    border: none; border-radius: 999px;
+    font-size: 16px; font-weight: 800;
+    box-shadow: 0 6px 18px rgba(201, 78, 122, .35);
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn:active { transform: translateY(1px); filter: brightness(.95); }
+  .btn.secondary { background: #fff; color: var(--pink-dark); border: 2px solid var(--pink); box-shadow: none; }
+  .btn.tiny { padding: 8px 14px; font-size: 13px; width: auto; }
+  .btn:disabled { opacity: .5; filter: grayscale(.4); }
+
+  /* TITLE */
+  #screen-title {
+    background: radial-gradient(circle at 50% 30%, #fff, var(--pink-light) 70%);
+    align-items: center; justify-content: center;
+    text-align: center; padding: 32px;
+  }
+  .title-art {
+    font-size: 56px; font-weight: 900;
+    background: linear-gradient(180deg, #ff96b4, var(--pink-dark));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    line-height: 1.05; letter-spacing: .02em;
+    text-shadow: 0 6px 0 rgba(255, 122, 162, .12);
+    margin-bottom: 8px;
+  }
+  .title-sub { color: var(--ink-soft); margin-bottom: 36px; font-size: 14px; }
+  .camera-illust {
+    width: 140px; height: 100px; margin: 16px auto 24px;
+    background: #fff; border-radius: 18px; position: relative;
+    box-shadow: var(--shadow);
+  }
+  .camera-illust::before {
+    content: ""; position: absolute; top: -8px; left: 24px; right: 24px; height: 16px;
+    background: #fff; border-radius: 8px 8px 0 0;
+  }
+  .camera-illust::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 56px; height: 56px;
+    border-radius: 50%; transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 30% 30%, #fff, #888 60%, #333 80%);
+    box-shadow: 0 0 0 4px #fff, 0 0 0 6px #ddd;
+  }
+  .start-hint { margin-top: 20px; color: var(--ink-soft); font-size: 13px; }
+
+  /* HOME */
+  .hero {
+    background: linear-gradient(135deg, #ffd1dc, #ffe4ec);
+    border-radius: 22px; padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .hero h2 { margin: 0 0 4px 0; font-size: 18px; color: var(--pink-dark); }
+  .hero p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .menu-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .menu-card {
+    background: #fff; border-radius: 18px; padding: 16px;
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; border: 2px solid transparent;
+    transition: transform .12s ease;
+  }
+  .menu-card:active { transform: scale(.97); border-color: var(--pink); }
+  .menu-card .emo { font-size: 38px; }
+  .menu-card .lbl { font-weight: 800; margin-top: 6px; }
+  .menu-card .sub { color: var(--ink-soft); font-size: 11px; margin-top: 2px; text-align: center; }
+
+  /* REQUESTS */
+  .request {
+    background: #fff; border-radius: 16px; padding: 14px;
+    box-shadow: var(--shadow); margin-bottom: 10px;
+    border-left: 6px solid var(--pink);
+  }
+  .request h3 { margin: 0 0 4px 0; font-size: 15px; }
+  .request .client { color: var(--pink-dark); font-size: 12px; margin-bottom: 6px; font-weight: 700; }
+  .request .desc { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .request .meta { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 10px; }
+  .reward { color: var(--gold); font-weight: 800; font-size: 14px; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    background: var(--pink-light); color: var(--pink-dark);
+    font-size: 11px; font-weight: 700;
+  }
+  .badge.locked { background: #eee; color: #999; }
+  .request.done { opacity: .6; }
+  .request.done::after { content: "撮影済"; color: var(--pink-dark); font-weight: 800; font-size: 11px; }
+
+  /* SHOOT */
+  #screen-shoot { background: #222; }
+  #shoot-canvas-wrap {
+    position: absolute; inset: 0;
+  }
+  #shoot-canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+  .shoot-top {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: max(env(safe-area-inset-top), 10px) 12px 10px;
+    display: flex; align-items: center; gap: 8px;
+    background: linear-gradient(180deg, rgba(0,0,0,.45), transparent);
+    z-index: 5; color: #fff;
+  }
+  .shoot-top .title { flex: 1; font-size: 13px; }
+  .shoot-top .title b { display: block; font-size: 15px; }
+  .shoot-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 10px 14px max(env(safe-area-inset-bottom), 14px);
+    background: linear-gradient(0deg, rgba(0,0,0,.55), transparent);
+    z-index: 5;
+    display: flex; flex-direction: column; gap: 8px; color: #fff;
+  }
+  .panel-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .scene-pill {
+    padding: 7px 12px; border-radius: 999px;
+    background: rgba(255,255,255,.18); color: #fff; font-size: 12px;
+    border: 1px solid rgba(255,255,255,.3);
+  }
+  .scene-pill.active { background: var(--pink); border-color: var(--pink); }
+  .slider-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .slider-row label { width: 56px; opacity: .9; }
+  .slider-row input[type=range] { flex: 1; }
+  .shutter-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+  .shutter {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: #fff; border: 4px solid rgba(255,255,255,.4);
+    box-shadow: 0 0 0 4px rgba(0,0,0,.2), 0 6px 20px rgba(0,0,0,.4);
+    cursor: pointer;
+  }
+  .shutter:active { transform: scale(.94); }
+  .ghost-btn {
+    background: rgba(255,255,255,.18); color: #fff;
+    border: 1px solid rgba(255,255,255,.3);
+    padding: 10px 14px; border-radius: 14px; font-size: 12px;
+  }
+  .grid-overlay {
+    position: absolute; inset: 0; pointer-events: none;
+    z-index: 4;
+    display: none;
+  }
+  .grid-overlay.on { display: block; }
+  .grid-overlay::before, .grid-overlay::after {
+    content: ""; position: absolute; left: 0; right: 0;
+    height: 1px; background: rgba(255,255,255,.4);
+  }
+  .grid-overlay::before { top: 33.33%; }
+  .grid-overlay::after { top: 66.66%; }
+  .grid-overlay span {
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: rgba(255,255,255,.4);
+  }
+  .grid-overlay span:nth-child(1) { left: 33.33%; }
+  .grid-overlay span:nth-child(2) { left: 66.66%; }
+
+  .loader-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; z-index: 6;
+  }
+
+  /* RESULT */
+  .photo-frame {
+    background: #fff; padding: 10px 10px 18px; border-radius: 8px;
+    box-shadow: var(--shadow);
+    transform: rotate(-1.2deg);
+    margin: 8px auto 16px;
+    max-width: 360px;
+  }
+  .photo-frame img { width: 100%; display: block; border-radius: 4px; background: #ddd; }
+  .photo-caption { text-align: center; padding-top: 8px; font-family: "Yu Mincho", serif; color: var(--ink-soft); font-size: 12px; }
+  .stars { font-size: 28px; color: #f7c01b; text-align: center; letter-spacing: 4px; margin: 4px 0; }
+  .stars .off { color: #ddd; }
+  .score-list { background: #fff; border-radius: 16px; padding: 14px; box-shadow: var(--shadow); }
+  .score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+  .score-row .lbl { width: 86px; color: var(--ink-soft); }
+  .score-row .bar { flex: 1; height: 8px; background: #f3e6ec; border-radius: 4px; overflow: hidden; }
+  .score-row .bar > div { height: 100%; background: linear-gradient(90deg, #ff96b4, var(--pink-dark)); }
+  .score-row .val { width: 36px; text-align: right; font-weight: 800; }
+  .reward-box {
+    background: linear-gradient(135deg, #fff3c8, #ffe18a);
+    border-radius: 16px; padding: 14px; text-align: center;
+    margin: 14px 0;
+  }
+  .reward-box .label { font-size: 12px; color: #8c6109; }
+  .reward-box .amount { font-size: 32px; font-weight: 900; color: #b07a08; }
+  .comment {
+    background: #fff; border-radius: 16px; padding: 14px;
+    box-shadow: var(--shadow); margin-bottom: 10px;
+    font-size: 13px; line-height: 1.6;
+  }
+  .comment .who { font-weight: 800; color: var(--pink-dark); margin-bottom: 4px; font-size: 12px; }
+
+  /* SHOP */
+  .shop-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .shop-card {
+    background: #fff; border-radius: 16px; padding: 12px;
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .shop-card .thumb {
+    aspect-ratio: 1/1; background: linear-gradient(135deg, #ffe4ec, #fff);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 50px;
+  }
+  .shop-card .name { font-weight: 800; font-size: 13px; }
+  .shop-card .price { color: var(--gold); font-weight: 800; font-size: 13px; }
+
+  /* Toast */
+  #toast {
+    position: fixed; left: 50%; top: 80px; transform: translateX(-50%);
+    background: rgba(50, 30, 50, .9); color: #fff;
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; z-index: 1000;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  #toast.show { opacity: 1; }
+
+  /* Loading */
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* small screens: hide title heading */
+  @media (max-height: 640px) {
+    .title-art { font-size: 40px; }
+    .camera-illust { width: 100px; height: 70px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TITLE -->
+  <section id="screen-title" class="screen active">
+    <div class="title-art">お写ん歩<br>スタジオ</div>
+    <div class="title-sub">家具を撮って、お部屋をかわいく。</div>
+    <div class="camera-illust"></div>
+    <button class="btn" id="btn-start">はじめる</button>
+    <div class="start-hint">スマホでも遊べる3D家具フォトゲーム</div>
+  </section>
+
+  <!-- HOME -->
+  <section id="screen-home" class="screen">
+    <div class="topbar">
+      <span style="width:40px"></span>
+      <h1>ホーム</h1>
+      <span class="gold-chip" id="gold-home">0</span>
+    </div>
+    <div class="content">
+      <div class="hero">
+        <h2 id="home-greet">こんにちは、フォトグラファーさん！</h2>
+        <p>依頼を受けて、家具を素敵に撮ろう。報酬で部屋の家具を増やせるよ。</p>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-card" data-go="requests">
+          <div class="emo">📷</div>
+          <div class="lbl">依頼を受ける</div>
+          <div class="sub">撮影してゴールド獲得</div>
+        </div>
+        <div class="menu-card" data-go="shop">
+          <div class="emo">🛋</div>
+          <div class="lbl">家具屋さん</div>
+          <div class="sub">お気に入りを購入</div>
+        </div>
+        <div class="menu-card" data-go="room">
+          <div class="emo">🏠</div>
+          <div class="lbl">マイルーム</div>
+          <div class="sub">所持家具を眺める</div>
+        </div>
+        <div class="menu-card" data-go="practice">
+          <div class="emo">🎨</div>
+          <div class="lbl">自由撮影</div>
+          <div class="sub">気軽に練習</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REQUESTS -->
+  <section id="screen-requests" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" data-go="home">←</button>
+      <h1>依頼一覧</h1>
+      <span class="gold-chip" id="gold-req">0</span>
+    </div>
+    <div class="content" id="request-list"></div>
+  </section>
+
+  <!-- SHOOT -->
+  <section id="screen-shoot" class="screen">
+    <div id="shoot-canvas-wrap">
+      <canvas id="shoot-canvas"></canvas>
+    </div>
+    <div class="grid-overlay" id="grid-overlay"><span></span><span></span></div>
+    <div class="shoot-top">
+      <button class="icon-btn" id="shoot-back" style="background: rgba(255,255,255,.85)">←</button>
+      <div class="title" id="shoot-title"><b>撮影中</b><span id="shoot-task"></span></div>
+      <button class="icon-btn" id="grid-toggle" style="background: rgba(255,255,255,.85)" title="グリッド">⌗</button>
+    </div>
+    <div class="shoot-bottom">
+      <div class="panel-row" id="scene-pills"></div>
+      <div class="slider-row">
+        <label>明るさ</label>
+        <input type="range" id="light-int" min="0.2" max="2.4" step="0.05" value="1">
+      </div>
+      <div class="slider-row">
+        <label>光の向き</label>
+        <input type="range" id="light-dir" min="0" max="360" step="1" value="45">
+      </div>
+      <div class="shutter-row">
+        <button class="ghost-btn" id="reset-cam">アングル<br>リセット</button>
+        <button class="shutter" id="shutter" aria-label="撮影"></button>
+        <button class="ghost-btn" id="hint-btn">ヒント</button>
+      </div>
+    </div>
+    <div class="loader-overlay" id="shoot-loader"><div class="spinner"></div>家具をロード中…</div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="screen-result" class="screen">
+    <div class="topbar">
+      <span style="width:40px"></span>
+      <h1>撮影結果</h1>
+      <span class="gold-chip" id="gold-res">0</span>
+    </div>
+    <div class="content">
+      <div class="photo-frame">
+        <img id="result-photo" alt="撮影写真">
+        <div class="photo-caption" id="result-caption"></div>
+      </div>
+      <div class="stars" id="result-stars"></div>
+      <div class="comment">
+        <div class="who" id="result-client">クライアント</div>
+        <div id="result-comment"></div>
+      </div>
+      <div class="score-list" id="score-list"></div>
+      <div class="reward-box">
+        <div class="label">獲得ゴールド</div>
+        <div class="amount"><span id="result-gold">0</span> G</div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn secondary" id="result-retry">もう一度撮る</button>
+        <button class="btn" id="result-back">ホームへ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOP -->
+  <section id="screen-shop" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" data-go="home">←</button>
+      <h1>家具屋さん</h1>
+      <span class="gold-chip" id="gold-shop">0</span>
+    </div>
+    <div class="content">
+      <div class="shop-grid" id="shop-grid"></div>
+    </div>
+  </section>
+
+  <!-- ROOM -->
+  <section id="screen-room" class="screen">
+    <div id="room-canvas-wrap" style="position:absolute; inset:0;">
+      <canvas id="room-canvas" style="width:100%; height:100%; display:block; touch-action:none;"></canvas>
+    </div>
+    <div class="shoot-top">
+      <button class="icon-btn" id="room-back" style="background: rgba(255,255,255,.85)">←</button>
+      <div class="title"><b>マイルーム</b><span id="room-stat"></span></div>
+      <span style="width:40px"></span>
+    </div>
+  </section>
+</div>
+
+<div id="toast"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ---------- Data ----------
+const FURNITURES = {
+  bed: {
+    id: 'bed',
+    name: 'コージーなプラッドベッド',
+    file: 'Meshy_AI_Cozy_Plaid_Bed_0420022356_texture.glb',
+    emo: '🛏',
+    price: 0,
+    targetSize: 2.0,
+    floorOffset: 0,
+    tags: ['cozy', 'bedroom'],
+  },
+  bookcase: {
+    id: 'bookcase',
+    name: 'パステル本棚',
+    file: 'Meshy_AI_Pastel_Bookcase_0420022422_texture.glb',
+    emo: '📚',
+    price: 220,
+    targetSize: 2.2,
+    floorOffset: 0,
+    tags: ['library', 'pastel'],
+  },
+  mystery: {
+    id: 'mystery',
+    name: 'ミステリーアイテム',
+    file: 'Meshy_AI__0420022529_texture.glb',
+    emo: '✨',
+    price: 160,
+    targetSize: 1.4,
+    floorOffset: 0,
+    tags: ['decor'],
+  },
+};
+
+const SCENES = {
+  studio: {
+    id: 'studio', name: '白ホリ',
+    bg: 0xfafafa, floor: 0xeeeeee,
+    ambient: 0.55, dirIntensity: 1.0,
+    lightColor: 0xffffff, fogNear: 30, fogFar: 60,
+  },
+  morning: {
+    id: 'morning', name: '朝',
+    bg: 0xfff3df, floor: 0xf2dfb8,
+    ambient: 0.5, dirIntensity: 1.1,
+    lightColor: 0xfff1cf, fogNear: 30, fogFar: 60,
+  },
+  evening: {
+    id: 'evening', name: '夕暮れ',
+    bg: 0xffc88a, floor: 0xc88350,
+    ambient: 0.45, dirIntensity: 0.95,
+    lightColor: 0xffb066, fogNear: 30, fogFar: 60,
+  },
+  night: {
+    id: 'night', name: 'ナイト',
+    bg: 0x1a2240, floor: 0x12182a,
+    ambient: 0.25, dirIntensity: 0.8,
+    lightColor: 0xb6c8ff, fogNear: 20, fogFar: 50,
+  },
+  natural: {
+    id: 'natural', name: 'ナチュラル',
+    bg: 0xe8efe1, floor: 0xc7b69a,
+    ambient: 0.55, dirIntensity: 1.0,
+    lightColor: 0xfff7e2, fogNear: 30, fogFar: 60,
+  },
+};
+
+const REQUESTS = [
+  {
+    id: 'r1',
+    client: 'コージーちゃん',
+    title: 'ベッドを単体で',
+    desc: 'シンプルでいいから、私のベッドを可愛く撮って！正面寄りより、ちょっと斜めから撮ると素敵だよ。',
+    required: ['bed'],
+    optional: [],
+    preferredScene: 'morning',
+    reward: 80,
+    hint: '主役を画面の3分の2くらいに。三分割の交点を意識してみて。',
+  },
+  {
+    id: 'r2',
+    client: '本好きさん',
+    title: 'パステル本棚を映えさせて',
+    desc: 'お気に入りの本棚を、ちゃんとしまった感じで撮ってください。',
+    required: ['bookcase'],
+    optional: [],
+    preferredScene: 'natural',
+    reward: 110,
+    hint: '本棚は縦長。少し離れて全体を写そう。',
+  },
+  {
+    id: 'r3',
+    client: 'インテリア雑誌「ねむ」',
+    title: 'ナチュラル寝室コーディネート',
+    desc: 'ベッドと本棚を一緒に。ナチュラルで穏やかな朝のイメージで。',
+    required: ['bed', 'bookcase'],
+    optional: [],
+    preferredScene: 'morning',
+    reward: 220,
+    hint: '両方を画面に収める広めのアングル。光は柔らかく。',
+  },
+  {
+    id: 'r4',
+    client: 'ミステリー雑貨店',
+    title: '謎アイテムを神秘的に',
+    desc: 'うちの新作、神秘的に撮ってもらえるかしら？夜の方が雰囲気出るかも。',
+    required: ['mystery'],
+    optional: [],
+    preferredScene: 'night',
+    reward: 130,
+    hint: '夜シーンで、ライトを少し落としてムードを出そう。',
+  },
+  {
+    id: 'r5',
+    client: 'カフェオーナー',
+    title: '夕暮れの読書コーナー',
+    desc: '夕日に照らされた本棚と、お気に入りの小物を一枚に。',
+    required: ['bookcase', 'mystery'],
+    optional: [],
+    preferredScene: 'evening',
+    reward: 240,
+    hint: '夕暮れシーンで光を斜めから当ててみて。',
+  },
+];
+
+// ---------- State / Save ----------
+const SAVE_KEY = 'oshanpo_studio_v1';
+const state = loadState();
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
+    return Object.assign({
+      gold: 0,
+      owned: ['bed'],
+      done: {},
+    }, s);
+  } catch (e) {
+    return { gold: 0, owned: ['bed'], done: {} };
+  }
+}
+function saveState() {
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+}
+function refreshGold() {
+  const s = String(state.gold);
+  document.querySelectorAll('#gold-home,#gold-req,#gold-shop,#gold-res').forEach(el => el.textContent = s);
+}
+
+// ---------- Screen routing ----------
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  refreshGold();
+  if (id === 'requests') renderRequests();
+  if (id === 'shop') renderShop();
+  if (id === 'room') openRoom();
+  else if (currentRoom.controls) closeRoom();
+  if (id !== 'shoot' && currentShoot.renderer) closeShoot();
+}
+document.querySelectorAll('[data-go]').forEach(el => {
+  el.addEventListener('click', () => {
+    const dest = el.dataset.go;
+    if (dest === 'practice') {
+      startShoot({
+        id: 'practice',
+        client: 'じぶん',
+        title: '自由撮影',
+        desc: '練習だよ。好きな家具を、好きなアングルで。',
+        required: state.owned.length ? [state.owned[0]] : ['bed'],
+        optional: state.owned.slice(1),
+        preferredScene: 'studio',
+        reward: 0,
+        hint: '気軽にいろいろ試してみよう。',
+      });
+    } else {
+      show(dest);
+    }
+  });
+});
+
+document.getElementById('btn-start').addEventListener('click', () => show('home'));
+
+// ---------- Toast ----------
+const toastEl = document.getElementById('toast');
+let toastT;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => toastEl.classList.remove('show'), 1800);
+}
+
+// ---------- Requests List ----------
+function renderRequests() {
+  const list = document.getElementById('request-list');
+  list.innerHTML = '';
+  REQUESTS.forEach(r => {
+    const missing = r.required.filter(id => !state.owned.includes(id));
+    const div = document.createElement('div');
+    div.className = 'request' + (state.done[r.id] ? ' done' : '');
+    div.innerHTML = `
+      <div class="client">📩 ${r.client}</div>
+      <h3>${r.title}</h3>
+      <div class="desc">${r.desc}</div>
+      <div class="meta">
+        ${missing.length
+          ? `<span class="badge locked">未所持: ${missing.map(id => FURNITURES[id].name).join(', ')}</span>`
+          : `<span class="badge">必要家具: OK</span>`
+        }
+        <span class="reward">${r.reward} G</span>
+      </div>
+    `;
+    if (missing.length === 0) {
+      const btn = document.createElement('button');
+      btn.className = 'btn tiny';
+      btn.textContent = state.done[r.id] ? 'もう一度撮る' : '受ける';
+      btn.style.marginTop = '8px';
+      btn.style.alignSelf = 'flex-end';
+      btn.addEventListener('click', () => startShoot(r));
+      div.appendChild(btn);
+    } else {
+      const sub = document.createElement('div');
+      sub.style.fontSize = '11px';
+      sub.style.color = 'var(--ink-soft)';
+      sub.style.marginTop = '8px';
+      sub.textContent = '※ ショップで「' + missing.map(id => FURNITURES[id].name).join('、') + '」を購入すると受けられるよ';
+      div.appendChild(sub);
+    }
+    list.appendChild(div);
+  });
+}
+
+// ---------- Shop ----------
+function renderShop() {
+  const grid = document.getElementById('shop-grid');
+  grid.innerHTML = '';
+  Object.values(FURNITURES).forEach(f => {
+    const owned = state.owned.includes(f.id);
+    const card = document.createElement('div');
+    card.className = 'shop-card';
+    card.innerHTML = `
+      <div class="thumb">${f.emo}</div>
+      <div class="name">${f.name}</div>
+      <div class="price">${owned ? '所持済' : f.price + ' G'}</div>
+    `;
+    const btn = document.createElement('button');
+    btn.className = 'btn tiny';
+    btn.textContent = owned ? '所持中' : '購入';
+    btn.disabled = owned || state.gold < f.price;
+    btn.addEventListener('click', () => {
+      if (state.gold < f.price) { toast('ゴールドが足りないよ'); return; }
+      state.gold -= f.price;
+      state.owned.push(f.id);
+      saveState();
+      refreshGold();
+      renderShop();
+      toast(`${f.name} をお迎えしたよ！`);
+    });
+    card.appendChild(btn);
+    grid.appendChild(card);
+  });
+}
+
+// ---------- GLB cache ----------
+const loader = new GLTFLoader();
+const glbCache = {};
+function loadFurniture(id) {
+  if (glbCache[id]) return Promise.resolve(glbCache[id].clone(true));
+  const f = FURNITURES[id];
+  return new Promise((resolve, reject) => {
+    loader.load(f.file, gltf => {
+      const root = gltf.scene;
+      // Normalize size
+      const box = new THREE.Box3().setFromObject(root);
+      const size = new THREE.Vector3(); box.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const scale = f.targetSize / maxDim;
+      root.scale.setScalar(scale);
+      // Recompute and put on floor
+      root.updateMatrixWorld(true);
+      const box2 = new THREE.Box3().setFromObject(root);
+      root.position.y -= box2.min.y;
+      root.traverse(n => {
+        if (n.isMesh) {
+          n.castShadow = true;
+          n.receiveShadow = true;
+          if (n.material && n.material.map) n.material.map.colorSpace = THREE.SRGBColorSpace;
+        }
+      });
+      glbCache[id] = root;
+      resolve(root.clone(true));
+    }, undefined, err => reject(err));
+  });
+}
+
+// ---------- Shoot Scene ----------
+const currentShoot = {
+  renderer: null, scene: null, camera: null, controls: null,
+  ambient: null, dir: null, sceneId: 'studio',
+  furnitures: {}, request: null, raf: null, floor: null,
+};
+
+function setupRenderer(canvas) {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  return renderer;
+}
+
+function applyScene(setting) {
+  const s = currentShoot.scene;
+  s.background = new THREE.Color(setting.bg);
+  s.fog = new THREE.Fog(setting.bg, setting.fogNear, setting.fogFar);
+  currentShoot.floor.material.color.setHex(setting.floor);
+  currentShoot.ambient.intensity = setting.ambient;
+  currentShoot.dir.color.setHex(setting.lightColor);
+  currentShoot.dir.intensity = setting.dirIntensity;
+  document.getElementById('light-int').value = setting.dirIntensity;
+}
+
+function setLightAngle(deg) {
+  const r = 6;
+  const rad = deg * Math.PI / 180;
+  currentShoot.dir.position.set(Math.cos(rad) * r, 6, Math.sin(rad) * r);
+  currentShoot.dir.target.position.set(0, 0.5, 0);
+  currentShoot.dir.target.updateMatrixWorld();
+}
+
+async function startShoot(request) {
+  if (currentShoot.renderer) closeShoot();
+  show('shoot');
+  currentShoot.request = request;
+  document.getElementById('shoot-task').textContent = ' / ' + request.title;
+  document.getElementById('shoot-loader').style.display = 'flex';
+
+  const canvas = document.getElementById('shoot-canvas');
+  const renderer = setupRenderer(canvas);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+  camera.position.set(3, 2, 4);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.target.set(0, 0.7, 0);
+  controls.minDistance = 1.5;
+  controls.maxDistance = 10;
+  controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambient);
+  const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+  dir.castShadow = true;
+  dir.shadow.mapSize.set(1024, 1024);
+  dir.shadow.camera.near = 0.5;
+  dir.shadow.camera.far = 30;
+  dir.shadow.camera.left = -6;
+  dir.shadow.camera.right = 6;
+  dir.shadow.camera.top = 6;
+  dir.shadow.camera.bottom = -6;
+  scene.add(dir);
+  scene.add(dir.target);
+
+  const floor = new THREE.Mesh(
+    new THREE.CircleGeometry(20, 48),
+    new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.9, metalness: 0 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  Object.assign(currentShoot, { renderer, scene, camera, controls, ambient, dir, floor, furnitures: {} });
+  currentShoot.sceneId = request.preferredScene || 'studio';
+  applyScene(SCENES[currentShoot.sceneId]);
+  setLightAngle(45);
+
+  // Scene pills
+  const pills = document.getElementById('scene-pills');
+  pills.innerHTML = '';
+  Object.values(SCENES).forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'scene-pill' + (s.id === currentShoot.sceneId ? ' active' : '');
+    b.textContent = s.name;
+    b.addEventListener('click', () => {
+      currentShoot.sceneId = s.id;
+      applyScene(s);
+      pills.querySelectorAll('.scene-pill').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    });
+    pills.appendChild(b);
+  });
+
+  // Resize
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  currentShoot.resize = resize;
+  window.addEventListener('resize', resize);
+
+  // Render loop
+  function tick() {
+    controls.update();
+    renderer.render(scene, camera);
+    currentShoot.raf = requestAnimationFrame(tick);
+  }
+  tick();
+
+  // Load furnitures
+  try {
+    const ids = [...new Set([...request.required, ...(request.optional || [])])];
+    const placements = layoutPositions(ids.length);
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      const obj = await loadFurniture(id);
+      obj.position.x = placements[i].x;
+      obj.position.z = placements[i].z;
+      obj.userData.id = id;
+      scene.add(obj);
+      currentShoot.furnitures[id] = obj;
+    }
+    // Frame all required objects
+    frameTo(request.required.map(id => currentShoot.furnitures[id]).filter(Boolean));
+    document.getElementById('shoot-loader').style.display = 'none';
+  } catch (e) {
+    console.error(e);
+    document.getElementById('shoot-loader').innerHTML = 'GLBの読み込みに失敗しました。<br>(ローカル静的サーバ越しに開いてね)';
+  }
+}
+
+function layoutPositions(n) {
+  if (n === 1) return [{ x: 0, z: 0 }];
+  if (n === 2) return [{ x: -1.0, z: 0 }, { x: 1.2, z: 0 }];
+  if (n === 3) return [{ x: -1.4, z: 0 }, { x: 0, z: -0.4 }, { x: 1.4, z: 0 }];
+  return Array.from({ length: n }, (_, i) => ({ x: (i - (n - 1) / 2) * 1.6, z: 0 }));
+}
+
+function frameTo(objs) {
+  if (!objs.length) return;
+  const box = new THREE.Box3();
+  objs.forEach(o => box.expandByObject(o));
+  const center = new THREE.Vector3(); box.getCenter(center);
+  const size = new THREE.Vector3(); box.getSize(size);
+  const dist = Math.max(size.x, size.y) * 1.6 + size.z;
+  const cam = currentShoot.camera;
+  cam.position.set(center.x + dist * 0.7, center.y + size.y * 0.6, center.z + dist);
+  currentShoot.controls.target.copy(center);
+  currentShoot.controls.update();
+}
+
+// Light + brightness inputs
+document.getElementById('light-int').addEventListener('input', e => {
+  if (currentShoot.dir) currentShoot.dir.intensity = parseFloat(e.target.value);
+});
+document.getElementById('light-dir').addEventListener('input', e => {
+  setLightAngle(parseFloat(e.target.value));
+});
+document.getElementById('reset-cam').addEventListener('click', () => {
+  if (!currentShoot.request) return;
+  frameTo(currentShoot.request.required.map(id => currentShoot.furnitures[id]).filter(Boolean));
+});
+document.getElementById('grid-toggle').addEventListener('click', () => {
+  document.getElementById('grid-overlay').classList.toggle('on');
+});
+document.getElementById('hint-btn').addEventListener('click', () => {
+  toast('💡 ' + (currentShoot.request?.hint || ''));
+});
+document.getElementById('shoot-back').addEventListener('click', () => show('home'));
+
+// Shutter
+document.getElementById('shutter').addEventListener('click', () => {
+  if (!currentShoot.renderer) return;
+  // Force a render to ensure latest frame
+  currentShoot.renderer.render(currentShoot.scene, currentShoot.camera);
+  const dataUrl = currentShoot.renderer.domElement.toDataURL('image/png');
+  const evalResult = evaluateShot();
+  showResult(dataUrl, evalResult);
+});
+
+function closeShoot() {
+  if (currentShoot.raf) cancelAnimationFrame(currentShoot.raf);
+  if (currentShoot.resize) window.removeEventListener('resize', currentShoot.resize);
+  if (currentShoot.renderer) {
+    currentShoot.renderer.dispose();
+    currentShoot.renderer = null;
+  }
+  currentShoot.scene = null;
+}
+
+// ---------- Evaluation ----------
+function evaluateShot() {
+  const req = currentShoot.request;
+  const cam = currentShoot.camera;
+  cam.updateMatrixWorld();
+  cam.updateProjectionMatrix();
+
+  // Per-required-object metrics
+  const objs = req.required.map(id => currentShoot.furnitures[id]).filter(Boolean);
+  if (!objs.length) return null;
+
+  let allInFrame = true;
+  let totalArea = 0;
+  let centers = [];
+  const unionMin = { x: Infinity, y: Infinity };
+  const unionMax = { x: -Infinity, y: -Infinity };
+
+  for (const o of objs) {
+    const b = new THREE.Box3().setFromObject(o);
+    const corners = [];
+    for (const x of [b.min.x, b.max.x])
+      for (const y of [b.min.y, b.max.y])
+        for (const z of [b.min.z, b.max.z]) {
+          const v = new THREE.Vector3(x, y, z).project(cam);
+          corners.push(v);
+        }
+    const inFront = corners.every(c => c.z > -1 && c.z < 1);
+    const minX = Math.min(...corners.map(c => c.x));
+    const maxX = Math.max(...corners.map(c => c.x));
+    const minY = Math.min(...corners.map(c => c.y));
+    const maxY = Math.max(...corners.map(c => c.y));
+    const fullyInFrame = inFront && minX > -1 && maxX < 1 && minY > -1 && maxY < 1;
+    if (!fullyInFrame) allInFrame = false;
+    const cx = clamp(-1, 1, (minX + maxX) / 2);
+    const cy = clamp(-1, 1, (minY + maxY) / 2);
+    centers.push({ cx, cy });
+    const w = Math.max(0, Math.min(1, maxX) - Math.max(-1, minX));
+    const h = Math.max(0, Math.min(1, maxY) - Math.max(-1, minY));
+    totalArea += (w * h) / 4;
+    unionMin.x = Math.min(unionMin.x, minX);
+    unionMin.y = Math.min(unionMin.y, minY);
+    unionMax.x = Math.max(unionMax.x, maxX);
+    unionMax.y = Math.max(unionMax.y, maxY);
+  }
+
+  // Framing score
+  let framing = 0;
+  if (totalArea < 0.04) framing = 25;
+  else if (totalArea < 0.12) framing = 60;
+  else if (totalArea < 0.55) framing = 100;
+  else if (totalArea < 0.8) framing = 70;
+  else framing = 35;
+  if (!allInFrame) framing = Math.min(framing, 50);
+
+  // Composition: union center near rule-of-thirds or center
+  const ucx = clamp(-1, 1, (unionMin.x + unionMax.x) / 2);
+  const ucy = clamp(-1, 1, (unionMin.y + unionMax.y) / 2);
+  const targets = [
+    [-1/3, 1/3], [1/3, 1/3], [-1/3, -1/3], [1/3, -1/3], [0, 0],
+  ];
+  const minDist = Math.min(...targets.map(([tx, ty]) => Math.hypot(ucx - tx, ucy - ty)));
+  const composition = Math.round(clamp(0, 100, 100 - minDist * 130));
+
+  // Angle: avoid pure front view
+  const target = currentShoot.controls.target.clone();
+  const dirVec = new THREE.Vector3().subVectors(cam.position, target).normalize();
+  const yawDeg = Math.atan2(dirVec.x, dirVec.z) * 180 / Math.PI;
+  const yawAbs = Math.abs(((yawDeg + 540) % 360) - 180);
+  // best around 25-50 deg from front
+  const yawFromFront = Math.min(Math.abs(yawAbs - 0), Math.abs(yawAbs - 360));
+  const yawDelta = Math.abs(yawDeg);
+  let angleScore;
+  const a = Math.abs(((yawDeg + 180 + 360) % 360) - 180); // 0..180 absolute yaw from -z forward
+  if (a < 5) angleScore = 50;
+  else if (a < 15) angleScore = 75;
+  else if (a < 60) angleScore = 100;
+  else if (a < 90) angleScore = 80;
+  else angleScore = 55;
+  const pitch = Math.asin(dirVec.y) * 180 / Math.PI;
+  if (pitch > 70) angleScore = Math.min(angleScore, 50); // too top-down
+  if (pitch < 0) angleScore = Math.min(angleScore, 60); // looking up too much
+
+  // Lighting
+  const totalLight = currentShoot.ambient.intensity + currentShoot.dir.intensity;
+  let lighting;
+  if (totalLight < 0.5) lighting = 30;
+  else if (totalLight < 0.9) lighting = 65;
+  else if (totalLight < 1.9) lighting = 100;
+  else if (totalLight < 2.4) lighting = 75;
+  else lighting = 45;
+
+  // Theme
+  const themeMatch = currentShoot.sceneId === req.preferredScene;
+  const theme = themeMatch ? 100 : 60;
+
+  const total = Math.round((framing + composition + angleScore + lighting + theme) / 5);
+  let stars = 1;
+  if (total >= 88) stars = 5;
+  else if (total >= 76) stars = 4;
+  else if (total >= 62) stars = 3;
+  else if (total >= 45) stars = 2;
+  const mult = clamp(0.4, 1.6, total / 70);
+  const gold = Math.round(req.reward * mult);
+
+  // Comment
+  const comment = makeComment({ framing, composition, angleScore, lighting, themeMatch }, req);
+
+  return { framing, composition, angle: angleScore, lighting, theme, total, stars, gold, comment, themeMatch };
+}
+
+function makeComment(s, req) {
+  const lines = [];
+  if (s.framing < 50) lines.push('もうちょっと主役を画面に大きく入れてみて！');
+  else if (s.framing < 80) lines.push('引きのバランスはまずまず、あと一歩で映える！');
+  else lines.push('被写体のサイズ感バッチリ！');
+
+  if (s.composition < 60) lines.push('主役の位置をズラして、三分割の交点に置くといい感じだよ。');
+  else if (s.composition < 85) lines.push('構図、いい感じ！もう少し交点を意識しても◎');
+  else lines.push('構図がプロっぽい！');
+
+  if (s.angleScore < 70) lines.push('真正面より、斜めから狙うと立体感が出るよ。');
+  if (s.lighting < 60) lines.push('ライトを少し明るく/暗くして、雰囲気を整えてみて。');
+  if (!s.themeMatch) lines.push(`テーマには「${SCENES[req.preferredScene].name}」のシーンが合うかも！`);
+  return lines.join(' ');
+}
+
+function clamp(min, max, v) { return Math.max(min, Math.min(max, v)); }
+
+// ---------- Result Screen ----------
+function showResult(dataUrl, evalRes) {
+  const req = currentShoot.request;
+  document.getElementById('result-photo').src = dataUrl;
+  document.getElementById('result-caption').textContent = req.title + '  / ' + new Date().toLocaleDateString('ja-JP');
+  // Stars
+  const starsEl = document.getElementById('result-stars');
+  starsEl.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const span = document.createElement('span');
+    span.textContent = '★';
+    if (i > evalRes.stars) span.className = 'off';
+    starsEl.appendChild(span);
+  }
+  document.getElementById('result-client').textContent = req.client + ' からのコメント';
+  document.getElementById('result-comment').textContent = evalRes.comment || '素敵な一枚！';
+  // Score bars
+  const list = document.getElementById('score-list');
+  const items = [
+    ['収まり', evalRes.framing],
+    ['構図', evalRes.composition],
+    ['アングル', evalRes.angle],
+    ['ライト', evalRes.lighting],
+    ['テーマ', evalRes.theme],
+  ];
+  list.innerHTML = items.map(([l, v]) => `
+    <div class="score-row">
+      <div class="lbl">${l}</div>
+      <div class="bar"><div style="width:${v}%"></div></div>
+      <div class="val">${v}</div>
+    </div>
+  `).join('') + `
+    <div class="score-row" style="margin-top:6px; font-weight:800">
+      <div class="lbl">合計</div>
+      <div class="bar"><div style="width:${evalRes.total}%"></div></div>
+      <div class="val">${evalRes.total}</div>
+    </div>`;
+
+  // Reward
+  let reward = evalRes.gold;
+  // No reward for free practice
+  if (req.id === 'practice') reward = 0;
+  // First completion bonus
+  if (reward > 0 && !state.done[req.id]) reward = Math.round(reward * 1.2);
+  document.getElementById('result-gold').textContent = reward;
+
+  if (reward > 0) {
+    state.gold += reward;
+    state.done[req.id] = (state.done[req.id] || 0) + 1;
+    saveState();
+  }
+
+  // Buttons
+  document.getElementById('result-retry').onclick = () => startShoot(req);
+  document.getElementById('result-back').onclick = () => show('home');
+
+  show('result');
+  refreshGold();
+}
+
+// ---------- My Room ----------
+const currentRoom = { renderer: null, scene: null, camera: null, controls: null, raf: null };
+async function openRoom() {
+  const canvas = document.getElementById('room-canvas');
+  const renderer = setupRenderer(canvas);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xfff3e9);
+  scene.fog = new THREE.Fog(0xfff3e9, 20, 50);
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+  camera.position.set(4.5, 3.5, 5);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.target.set(0, 0.8, 0);
+  controls.maxPolarAngle = Math.PI / 2 + 0.1;
+  controls.minDistance = 2;
+  controls.maxDistance = 14;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+  const dir = new THREE.DirectionalLight(0xfff5d6, 1.0);
+  dir.position.set(5, 8, 4);
+  dir.castShadow = true;
+  dir.shadow.mapSize.set(1024, 1024);
+  scene.add(dir);
+
+  // Walls (two walls)
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xfff0e0, roughness: 1 });
+  const wallA = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat);
+  wallA.position.set(0, 3, -4);
+  scene.add(wallA);
+  const wallB = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat);
+  wallB.position.set(-4, 3, 0);
+  wallB.rotation.y = Math.PI / 2;
+  scene.add(wallB);
+  // Floor
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xeed4b6, roughness: 1 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // Place owned furniture
+  const owned = state.owned;
+  const positions = [
+    { x: -1.5, z: -2.5 },
+    { x: 2, z: -2.5 },
+    { x: -2.5, z: 1 },
+    { x: 1.5, z: 1.5 },
+  ];
+  for (let i = 0; i < owned.length; i++) {
+    const obj = await loadFurniture(owned[i]);
+    obj.position.x = positions[i % positions.length].x;
+    obj.position.z = positions[i % positions.length].z;
+    obj.rotation.y = Math.random() * 0.6 - 0.3;
+    scene.add(obj);
+  }
+
+  document.getElementById('room-stat').textContent = ' / 所持家具 ' + owned.length + '点';
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  currentRoom.resize = resize;
+
+  Object.assign(currentRoom, { renderer, scene, camera, controls });
+  function tick() {
+    controls.update();
+    renderer.render(scene, camera);
+    currentRoom.raf = requestAnimationFrame(tick);
+  }
+  tick();
+}
+function closeRoom() {
+  if (currentRoom.raf) cancelAnimationFrame(currentRoom.raf);
+  if (currentRoom.resize) window.removeEventListener('resize', currentRoom.resize);
+  if (currentRoom.renderer) currentRoom.renderer.dispose();
+  currentRoom.renderer = null;
+  currentRoom.controls = null;
+}
+document.getElementById('room-back').addEventListener('click', () => show('home'));
+
+// Init
+refreshGold();
+
+// Prevent double-tap zoom on iOS
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd < 300) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
+
+</script>
+</body>
+</html>
