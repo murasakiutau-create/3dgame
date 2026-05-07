@@ -1644,6 +1644,7 @@ function attachShootEditor(canvas, camera, controls) {
     updateRing();
     screen.classList.add('editing');
     editBar.classList.add('show');
+    controls.enabled = false; // lock camera while editing
   }
   function deselectObj() {
     selected = null;
@@ -1651,6 +1652,7 @@ function attachShootEditor(canvas, camera, controls) {
     ring.visible = false;
     screen.classList.remove('editing');
     editBar.classList.remove('show');
+    controls.enabled = true; // resume camera control
   }
   currentShoot.deselect = deselectObj;
   currentShoot.updateRing = updateRing;
@@ -1663,21 +1665,39 @@ function attachShootEditor(canvas, camera, controls) {
     const dy = Math.abs(e.clientY - lastTap.y);
     const dt = now - lastTap.time;
     const isDouble = lastTap.time > 0 && dt < 350 && dx < 30 && dy < 30;
-    if (!isDouble) {
-      lastTap = { time: now, x: e.clientX, y: e.clientY };
-      return; // pass to OrbitControls for single-tap orbit
+    lastTap = isDouble ? { time: 0, x: 0, y: 0 } : { time: now, x: e.clientX, y: e.clientY };
+
+    if (selected) {
+      // EDIT MODE: any drag moves the selected furniture; double-tap empty
+      // deselects; double-tap on another furniture switches selection.
+      const m = ndc(e);
+      raycaster.setFromCamera(m, camera);
+      const hits = raycaster.intersectObjects(visibleRoots(), true);
+      if (isDouble) {
+        if (!hits.length) {
+          deselectObj();
+          e.stopImmediatePropagation();
+          return;
+        }
+        const root = findRoot(hits[0].object);
+        if (root && root !== selected) selectObj(root);
+      }
+      const target = selected;
+      const hp = new THREE.Vector3();
+      if (raycaster.ray.intersectPlane(dragPlane, hp)) {
+        dragOffset.set(target.position.x - hp.x, 0, target.position.z - hp.z);
+      }
+      isDragging = true;
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+      e.stopImmediatePropagation();
+      return;
     }
-    lastTap = { time: 0, x: 0, y: 0 };
+
+    if (!isDouble) return; // not in edit mode: pass through to OrbitControls
     const m = ndc(e);
     raycaster.setFromCamera(m, camera);
     const hits = raycaster.intersectObjects(visibleRoots(), true);
-    if (!hits.length) {
-      if (selected) {
-        deselectObj();
-        e.stopImmediatePropagation();
-      }
-      return;
-    }
+    if (!hits.length) return;
     const root = findRoot(hits[0].object);
     if (!root) return;
     selectObj(root);
@@ -1686,7 +1706,6 @@ function attachShootEditor(canvas, camera, controls) {
       dragOffset.set(root.position.x - hp.x, 0, root.position.z - hp.z);
     }
     isDragging = true;
-    controls.enabled = false;
     try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
     e.stopImmediatePropagation();
   }
@@ -1704,7 +1723,7 @@ function attachShootEditor(canvas, camera, controls) {
   function onPointerUp(e) {
     if (isDragging) {
       isDragging = false;
-      controls.enabled = true;
+      // controls stay locked while selected; deselect re-enables them
     }
   }
   canvas.addEventListener('pointerdown', onPointerDown, true);
@@ -2098,7 +2117,7 @@ async function openRoom() {
   document.getElementById('room-stat').textContent = ' / 所持家具 ' + owned.length + '点';
   const helpEl = document.getElementById('room-help');
   const barEl = document.getElementById('room-edit-bar');
-  helpEl.textContent = '家具をダブルタップ→ドラッグで配置できます';
+  helpEl.textContent = '家具をダブルタップ→編集モードに入ります';
   barEl.classList.remove('show');
 
   // Resize
@@ -2149,13 +2168,15 @@ async function openRoom() {
     selected = root;
     updateRing();
     barEl.classList.add('show');
-    helpEl.textContent = 'ドラッグで移動 / ボタンで回転';
+    helpEl.textContent = 'ドラッグで移動 / ボタンで回転 / 確定でカメラ操作に戻る';
+    controls.enabled = false; // lock camera while editing
   }
   function deselectObj() {
     selected = null;
     ring.visible = false;
     barEl.classList.remove('show');
-    helpEl.textContent = '家具をダブルタップ→ドラッグで配置できます';
+    helpEl.textContent = '家具をダブルタップ→編集モードに入ります';
+    controls.enabled = true; // resume camera control
   }
   function saveLayout() {
     const layout = {};
@@ -2178,21 +2199,39 @@ async function openRoom() {
     const dy = Math.abs(e.clientY - lastTap.y);
     const dt = now - lastTap.time;
     const isDouble = lastTap.time > 0 && dt < 350 && dx < 30 && dy < 30;
-    if (!isDouble) {
-      lastTap = { time: now, x: e.clientX, y: e.clientY };
+    lastTap = isDouble ? { time: 0, x: 0, y: 0 } : { time: now, x: e.clientX, y: e.clientY };
+
+    if (selected) {
+      // EDIT MODE: drags move the selected furniture; double-tap empty
+      // deselects; double-tap on another furniture switches selection.
+      const m = ndc(e);
+      raycaster.setFromCamera(m, camera);
+      const hits = raycaster.intersectObjects(visibleRoots(), true);
+      if (isDouble) {
+        if (!hits.length) {
+          deselectObj();
+          e.stopImmediatePropagation();
+          return;
+        }
+        const root = findRoot(hits[0].object);
+        if (root && root !== selected) selectObj(root);
+      }
+      const target = selected;
+      const hp = new THREE.Vector3();
+      if (raycaster.ray.intersectPlane(dragPlane, hp)) {
+        dragOffset.set(target.position.x - hp.x, 0, target.position.z - hp.z);
+      }
+      isDragging = true;
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+      e.stopImmediatePropagation();
       return;
     }
-    lastTap = { time: 0, x: 0, y: 0 };
+
+    if (!isDouble) return;
     const m = ndc(e);
     raycaster.setFromCamera(m, camera);
     const hits = raycaster.intersectObjects(visibleRoots(), true);
-    if (!hits.length) {
-      if (selected) {
-        deselectObj();
-        e.stopImmediatePropagation();
-      }
-      return;
-    }
+    if (!hits.length) return;
     const root = findRoot(hits[0].object);
     if (!root) return;
     selectObj(root);
@@ -2201,7 +2240,6 @@ async function openRoom() {
       dragOffset.set(root.position.x - hp.x, 0, root.position.z - hp.z);
     }
     isDragging = true;
-    controls.enabled = false;
     try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
     e.stopImmediatePropagation();
   }
@@ -2219,8 +2257,8 @@ async function openRoom() {
   function onPointerUp(e) {
     if (isDragging) {
       isDragging = false;
-      controls.enabled = true;
       saveLayout();
+      // controls stay locked while selected; deselect re-enables them
     }
   }
   canvas.addEventListener('pointerdown', onPointerDown, true);
