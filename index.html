@@ -650,46 +650,139 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // ---------- Data ----------
 const FURNITURES = {
   bed: {
-    id: 'bed',
-    name: 'コージーなプラッドベッド',
+    id: 'bed', name: 'コージーベッド', emo: '🛏',
     file: 'Meshy_AI_Cozy_Plaid_Bed_0420022356_texture.glb',
-    emo: '🛏',
-    price: 0,
-    targetSize: 2.0,
-    floorOffset: 0,
-    tags: ['cozy', 'bedroom'],
-  },
-  bookcase: {
-    id: 'bookcase',
-    name: 'パステル本棚',
-    file: 'Meshy_AI_Pastel_Bookcase_0420022422_texture.glb',
-    emo: '📚',
-    price: 220,
-    targetSize: 2.2,
-    floorOffset: 0,
-    tags: ['library', 'pastel'],
-  },
-  mystery: {
-    id: 'mystery',
-    name: 'ミステリーアイテム',
-    file: 'Meshy_AI__0420022529_texture.glb',
-    emo: '✨',
-    price: 160,
-    targetSize: 1.4,
-    floorOffset: 0,
-    tags: ['decor'],
+    price: 0, targetSize: 2.0, tags: ['cozy', 'bedroom'],
   },
   cabinet: {
-    id: 'cabinet',
-    name: 'ウッドキャビネット',
+    id: 'cabinet', name: 'ウッドキャビネット', emo: '🗄',
     file: 'Wood_Cabinet.glb',
-    emo: '🗄',
-    price: 200,
-    targetSize: 1.6,
-    floorOffset: 0,
-    tags: ['storage', 'wooden'],
+    price: 200, targetSize: 1.6, tags: ['storage', 'wooden'],
+  },
+  sofa: {
+    id: 'sofa', name: 'ブルーソファ', emo: '🛋',
+    file: 'Blue_Sofa.glb',
+    price: 280, targetSize: 2.0, tags: ['living', 'blue'],
+  },
+  mini_shelf: {
+    id: 'mini_shelf', name: 'ブルーミニ本棚', emo: '📘',
+    file: 'Blue_mini_bookshelf.glb',
+    price: 140, targetSize: 1.2, tags: ['blue', 'storage'],
+  },
+  icebox: {
+    id: 'icebox', name: 'クリーム冷蔵庫', emo: '🧊',
+    file: 'Cream_ice_box.glb',
+    price: 260, targetSize: 1.8, tags: ['kitchen'],
+  },
+  green_cabinet: {
+    id: 'green_cabinet', name: 'グリーンキャビネット', emo: '🟢',
+    file: 'Green_Cabinet.glb',
+    price: 220, targetSize: 1.6, tags: ['storage', 'green'],
+  },
+  green_drawer: {
+    id: 'green_drawer', name: 'グリーンチェスト', emo: '🟩',
+    file: 'Green_drawer_Cabinet.glb',
+    price: 230, targetSize: 1.4, tags: ['storage', 'green'],
+  },
+  sink: {
+    id: 'sink', name: 'グリーンシンク', emo: '🚰',
+    file: 'Green_kitchen_sink.glb',
+    price: 280, targetSize: 1.8, tags: ['kitchen', 'green'],
+  },
+  pink_kitchen: {
+    id: 'pink_kitchen', name: 'ピンクキッチン', emo: '🌸',
+    file: 'Pink_White_kitchen_Cabinet.glb',
+    price: 320, targetSize: 2.0, tags: ['kitchen', 'pink'],
+  },
+  lamp: {
+    id: 'lamp', name: 'リボンランプ', emo: '💡',
+    file: 'Red_ribbon_lamp.glb',
+    price: 110, targetSize: 1.0, tags: ['light', 'red'],
+  },
+  dresser: {
+    id: 'dresser', name: 'ホワイトドレッサー', emo: '💄',
+    file: 'White_dresser.glb',
+    price: 280, targetSize: 1.6, tags: ['bedroom', 'white'],
+  },
+  blue_chair: {
+    id: 'blue_chair', name: 'ブルーチェア', emo: '🪑',
+    file: 'Wood_Blue_chair.glb',
+    price: 150, targetSize: 1.2, tags: ['chair', 'blue'],
+  },
+  flower_table: {
+    id: 'flower_table', name: 'フラワーテーブル', emo: '🌷',
+    file: 'Wood_Flower_square_table.glb',
+    price: 200, targetSize: 1.4, tags: ['table', 'wooden'],
+  },
+  heart_cabinet: {
+    id: 'heart_cabinet', name: 'ハートキャビネット', emo: '💕',
+    file: 'Wood_Heart_Cabinet.glb',
+    price: 240, targetSize: 1.6, tags: ['storage', 'cute'],
+  },
+  heart_chair: {
+    id: 'heart_chair', name: 'ハートチェア', emo: '💖',
+    file: 'Wood_Heart_chair.glb',
+    price: 170, targetSize: 1.2, tags: ['chair', 'cute'],
+  },
+  clock: {
+    id: 'clock', name: 'ウッドクロック', emo: '🕰',
+    file: 'Wood_clock.glb',
+    price: 120, targetSize: 1.4, tags: ['decor'],
+  },
+  coatrack: {
+    id: 'coatrack', name: 'コートラック', emo: '🧥',
+    file: 'Wood_coat_rack.glb',
+    price: 160, targetSize: 1.7, tags: ['entrance'],
+  },
+  colorful_kitchen: {
+    id: 'colorful_kitchen', name: 'カラフルキッチン', emo: '🍳',
+    file: 'Wood_colorful_kitchen.glb',
+    price: 360, targetSize: 2.2, tags: ['kitchen'],
+  },
+  wood_drawer: {
+    id: 'wood_drawer', name: 'ウッドチェスト', emo: '🗃',
+    file: 'Wood_drawer_Cabinet.glb',
+    price: 220, targetSize: 1.4, tags: ['storage'],
+  },
+  nightstand: {
+    id: 'nightstand', name: 'ナイトスタンド', emo: '🌙',
+    file: 'Wood_nightstand.glb',
+    price: 150, targetSize: 1.0, tags: ['bedroom'],
+  },
+  pink_chair: {
+    id: 'pink_chair', name: 'ピンクチェア', emo: '🪑',
+    file: 'Wood_pink_chair.glb',
+    price: 150, targetSize: 1.2, tags: ['chair', 'pink'],
+  },
+  pink_stool: {
+    id: 'pink_stool', name: 'ピンクスツール', emo: '🩷',
+    file: 'Wood_pink_stool.glb',
+    price: 110, targetSize: 0.9, tags: ['chair', 'pink'],
+  },
+  round_table: {
+    id: 'round_table', name: 'ラウンドテーブル', emo: '⭕',
+    file: 'Wood_round_table.glb',
+    price: 200, targetSize: 1.3, tags: ['table'],
+  },
+  shelf: {
+    id: 'shelf', name: 'ウッドシェルフ', emo: '📚',
+    file: 'Wood_shelf.glb',
+    price: 200, targetSize: 1.6, tags: ['storage'],
+  },
+  wallclock: {
+    id: 'wallclock', name: 'ウォールクロック', emo: '⏰',
+    file: 'Wood_wallclock.glb',
+    price: 100, targetSize: 0.7, floorY: 1.4, tags: ['wall', 'decor'],
+  },
+  wallshelf: {
+    id: 'wallshelf', name: 'ウォールシェルフ', emo: '🪧',
+    file: 'Wood_wallshelf.glb',
+    price: 130, targetSize: 1.0, floorY: 1.2, tags: ['wall', 'storage'],
   },
 };
+
+// Refund table for furniture removed in updates
+const REMOVED_FURNITURES = { bookcase: 220, mystery: 160 };
 
 const SCENES = {
   studio: {
@@ -726,81 +819,76 @@ const SCENES = {
 
 const REQUESTS = [
   {
-    id: 'r1',
-    client: 'コージーちゃん',
-    title: 'ベッドを単体で',
-    desc: 'シンプルでいいから、私のベッドを可愛く撮って！正面寄りより、ちょっと斜めから撮ると素敵だよ。',
-    required: ['bed'],
-    optional: [],
-    preferredScene: 'morning',
-    reward: 80,
-    hint: '主役を画面の3分の2くらいに。三分割の交点を意識してみて。',
+    id: 'q1', client: 'コージーちゃん', title: 'ベッドを単体で',
+    desc: 'シンプルでいいから、私のベッドを可愛く撮って！斜めからがおすすめ。',
+    required: ['bed'], optional: [], preferredScene: 'morning',
+    reward: 80, hint: '主役を画面の3分の2くらいに。三分割の交点を意識してみて。',
   },
   {
-    id: 'r2',
-    client: '本好きさん',
-    title: 'パステル本棚を映えさせて',
-    desc: 'お気に入りの本棚を、ちゃんとしまった感じで撮ってください。',
-    required: ['bookcase'],
-    optional: [],
-    preferredScene: 'natural',
-    reward: 110,
-    hint: '本棚は縦長。少し離れて全体を写そう。',
-  },
-  {
-    id: 'r3',
-    client: 'インテリア雑誌「ねむ」',
-    title: 'ナチュラル寝室コーディネート',
-    desc: 'ベッドと本棚を一緒に。ナチュラルで穏やかな朝のイメージで。',
-    required: ['bed', 'bookcase'],
-    optional: [],
-    preferredScene: 'morning',
-    reward: 220,
-    hint: '両方を画面に収める広めのアングル。光は柔らかく。',
-  },
-  {
-    id: 'r4',
-    client: 'ミステリー雑貨店',
-    title: '謎アイテムを神秘的に',
-    desc: 'うちの新作、神秘的に撮ってもらえるかしら？夜の方が雰囲気出るかも。',
-    required: ['mystery'],
-    optional: [],
-    preferredScene: 'night',
-    reward: 130,
-    hint: '夜シーンで、ライトを少し落としてムードを出そう。',
-  },
-  {
-    id: 'r5',
-    client: 'カフェオーナー',
-    title: '夕暮れの読書コーナー',
-    desc: '夕日に照らされた本棚と、お気に入りの小物を一枚に。',
-    required: ['bookcase', 'mystery'],
-    optional: [],
-    preferredScene: 'evening',
-    reward: 240,
-    hint: '夕暮れシーンで光を斜めから当ててみて。',
-  },
-  {
-    id: 'r6',
-    client: '蚤の市の店主',
-    title: 'ウッドキャビネットを撮って',
+    id: 'q2', client: '蚤の市の店主', title: 'ウッドキャビネットを撮って',
     desc: '木の温もりが伝わる、ナチュラルな雰囲気で撮ってほしいの。',
-    required: ['cabinet'],
-    optional: [],
-    preferredScene: 'natural',
-    reward: 140,
-    hint: '少し離れて全体を入れて。光は柔らかく、斜めから当てると木目が映えるよ。',
+    required: ['cabinet'], optional: [], preferredScene: 'natural',
+    reward: 140, hint: '少し離れて全体を入れて。光は柔らかく、斜めから当てると木目が映えるよ。',
   },
   {
-    id: 'r7',
-    client: 'インテリア雑誌「shio」',
-    title: '本棚×キャビネットの収納特集',
-    desc: '収納家具を並べて、暮らしの一角をオシャレに切り取って。',
-    required: ['bookcase', 'cabinet'],
-    optional: [],
-    preferredScene: 'morning',
-    reward: 260,
-    hint: '背の高さが違う家具をバランスよく。引き気味のアングルで。',
+    id: 'q3', client: '時計屋さん', title: 'ウッドクロックを魅力的に',
+    desc: 'うちの新作の時計を、雑誌に載せたいの！',
+    required: ['clock'], optional: [], preferredScene: 'natural',
+    reward: 110, hint: '小物は寄りで。文字盤がきれいに見える角度を探して。',
+  },
+  {
+    id: 'q4', client: 'ご新居さん', title: 'ベッドルームコーディネート',
+    desc: 'ベッドとナイトスタンドとドレッサーで、朝の寝室をお願い。',
+    required: ['bed', 'nightstand', 'dresser'], optional: [], preferredScene: 'morning',
+    reward: 280, hint: 'ナイトスタンドはベッドの脇に。引きで全体を捉えて。',
+  },
+  {
+    id: 'q5', client: 'カフェオーナー', title: 'リビングのソファ特集',
+    desc: 'ブルーソファとリボンランプ、ラウンドテーブルでくつろぐ夕暮れを。',
+    required: ['sofa', 'lamp', 'round_table'], optional: [], preferredScene: 'evening',
+    reward: 320, hint: '夕暮れシーンで斜めから。ランプがアクセント。',
+  },
+  {
+    id: 'q6', client: '料理研究家', title: '朝のキッチン',
+    desc: 'シンクと冷蔵庫で、ナチュラルな朝のキッチンを切り取って。',
+    required: ['sink', 'icebox'], optional: [], preferredScene: 'morning',
+    reward: 280, hint: '広めのアングルで2点を収めて。',
+  },
+  {
+    id: 'q7', client: 'ピンクラブ', title: 'ピンクで揃えて',
+    desc: 'ピンクキッチンとピンクチェアで、可愛いキッチンを！',
+    required: ['pink_kitchen', 'pink_chair'], optional: [], preferredScene: 'morning',
+    reward: 300, hint: 'ピンク同士が映えるよう、ナチュラルか朝シーンで。',
+  },
+  {
+    id: 'q8', client: 'カフェ「Heart」', title: 'ハートシリーズ',
+    desc: 'ハートチェアとハートキャビネットで可愛らしく。',
+    required: ['heart_chair', 'heart_cabinet'], optional: [], preferredScene: 'natural',
+    reward: 240, hint: '中央配置で正面から、ハート柄が映えるよう。',
+  },
+  {
+    id: 'q9', client: 'インテリア雑誌「shio」', title: '収納特集',
+    desc: 'ウッドシェルフ・ミニ本棚・ウッドチェストで、暮らしの収納を一枚に。',
+    required: ['shelf', 'mini_shelf', 'wood_drawer'], optional: [], preferredScene: 'morning',
+    reward: 320, hint: '高さの違いを生かしてリズムよく並べてみて。',
+  },
+  {
+    id: 'q10', client: 'グリーンの家', title: 'グリーンキャビネット&チェスト',
+    desc: '緑の家具でナチュラルな収納コーナーを撮って。',
+    required: ['green_cabinet', 'green_drawer'], optional: [], preferredScene: 'natural',
+    reward: 260, hint: '同系色同士、距離感に気をつけて。',
+  },
+  {
+    id: 'q11', client: '夜のショーウィンドウ', title: 'ランプ単体ナイトショット',
+    desc: 'リボンランプを夜の雰囲気で。',
+    required: ['lamp'], optional: [], preferredScene: 'night',
+    reward: 130, hint: '夜シーンで、ライトを少し落としてムードを。',
+  },
+  {
+    id: 'q12', client: '工房レトロ', title: 'カラフルキッチンを一枚で',
+    desc: 'カラフルなキッチンの全体像を、引きでお願い。',
+    required: ['colorful_kitchen'], optional: [], preferredScene: 'natural',
+    reward: 200, hint: '大物は背景余白を活かして。',
   },
 ];
 
@@ -809,18 +897,29 @@ const SAVE_KEY = 'oshanpo_studio_v1';
 const state = loadState();
 
 function loadState() {
+  let s;
   try {
-    const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
-    return Object.assign({
-      gold: 0,
-      owned: ['bed'],
-      done: {},
-      roomLayout: {},
-      roomHidden: {},
-    }, s);
-  } catch (e) {
-    return { gold: 0, owned: ['bed'], done: {}, roomLayout: {}, roomHidden: {} };
+    s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
+  } catch (e) { s = {}; }
+  s = Object.assign({
+    gold: 0, owned: ['bed'], done: {}, roomLayout: {}, roomHidden: {},
+  }, s);
+  // Migration: refund and drop obsolete furniture
+  let refund = 0;
+  s.owned = (s.owned || []).filter(id => {
+    if (FURNITURES[id]) return true;
+    if (REMOVED_FURNITURES[id]) refund += REMOVED_FURNITURES[id];
+    return false;
+  });
+  if (refund > 0) s.gold = (s.gold || 0) + refund;
+  if (!s.owned.includes('bed')) s.owned.unshift('bed');
+  for (const k of Object.keys(s.roomLayout || {})) {
+    if (!FURNITURES[k]) delete s.roomLayout[k];
   }
+  for (const k of Object.keys(s.roomHidden || {})) {
+    if (!FURNITURES[k]) delete s.roomHidden[k];
+  }
+  return s;
 }
 function saveState() {
   localStorage.setItem(SAVE_KEY, JSON.stringify(state));
@@ -1034,10 +1133,10 @@ function loadFurniture(id) {
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
       const scale = f.targetSize / maxDim;
       root.scale.setScalar(scale);
-      // Recompute and put on floor
+      // Recompute and put on floor (or floating at floorY)
       root.updateMatrixWorld(true);
       const box2 = new THREE.Box3().setFromObject(root);
-      root.position.y -= box2.min.y;
+      root.position.y = -box2.min.y + (f.floorY || 0);
       root.traverse(n => {
         if (n.isMesh) {
           n.castShadow = true;
@@ -1754,6 +1853,13 @@ async function openRoom() {
     { x: -3, z: 1, ry: 0.5 },
     { x: 1.6, z: 1.6, ry: -0.2 },
     { x: 0, z: -2, ry: 0 },
+    { x: 3, z: -1, ry: -0.6 },
+    { x: -3, z: -1, ry: 0.6 },
+    { x: 0, z: 2.5, ry: 0 },
+    { x: 2, z: 2.5, ry: -0.4 },
+    { x: -2, z: 2.5, ry: 0.4 },
+    { x: 3.5, z: 1.5, ry: -0.5 },
+    { x: -3.5, z: -2.5, ry: 0.4 },
   ];
   const hidden = state.roomHidden || {};
   const furnitureRoots = [];
