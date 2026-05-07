@@ -346,6 +346,68 @@
   .room-edit-btn:active { transform: scale(.97); }
   .room-edit-btn.primary { background: var(--pink); color: #fff; }
 
+  /* Shoot edit bar (overlays shoot-bottom while editing) */
+  .shoot-edit-bar {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 12px 12px max(env(safe-area-inset-bottom), 14px);
+    display: none; gap: 8px; justify-content: center;
+    background: linear-gradient(0deg, rgba(0,0,0,.6), transparent);
+    z-index: 8;
+  }
+  .shoot-edit-bar.show { display: flex; }
+  #screen-shoot.editing .shoot-bottom { opacity: 0; pointer-events: none; }
+
+  /* Modal (stash list) */
+  .modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 1100;
+    display: none;
+    align-items: flex-end; justify-content: center;
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+  .modal.show { display: flex; }
+  .modal-card {
+    background: #fff;
+    width: 100%;
+    max-width: 540px;
+    max-height: 80vh;
+    border-radius: 18px 18px 0 0;
+    display: flex; flex-direction: column;
+    padding: 14px 14px max(env(safe-area-inset-bottom), 14px);
+    animation: slideUp .22s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  @media (min-width: 540px) {
+    .modal { align-items: center; }
+    .modal-card { border-radius: 18px; max-width: 440px; }
+  }
+  .modal-head {
+    display: flex; align-items: center; gap: 10px; padding: 4px 0 12px;
+    border-bottom: 1px solid #f3e6ec;
+  }
+  .modal-head h3 { flex: 1; margin: 0; font-size: 16px; color: var(--pink-dark); }
+  .modal-body { overflow: auto; flex: 1; padding-top: 6px; }
+  .stash-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 4px; border-bottom: 1px solid #f7e7ee;
+  }
+  .stash-item:last-child { border-bottom: none; }
+  .stash-item .emo {
+    font-size: 28px; width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--pink-light); border-radius: 12px;
+  }
+  .stash-item .name { flex: 1; font-weight: 800; font-size: 14px; }
+  .stash-item .status {
+    font-size: 11px; color: var(--ink-soft);
+    margin-right: 4px;
+  }
+  .stash-item .status.hidden { color: #b8a; }
+
   /* small screens: hide title heading */
   @media (max-height: 640px) {
     .title-art { font-size: 40px; }
@@ -422,6 +484,7 @@
     <div class="shoot-top">
       <button class="icon-btn" id="shoot-back" style="background: rgba(255,255,255,.85)">←</button>
       <div class="title" id="shoot-title"><b>撮影中</b><span id="shoot-task"></span></div>
+      <button class="icon-btn" id="shoot-stash" style="background: rgba(255,255,255,.85); display:none" title="家具リスト">📦</button>
       <button class="icon-btn" id="grid-toggle" style="background: rgba(255,255,255,.85)" title="グリッド">⌗</button>
     </div>
     <div class="shoot-bottom">
@@ -441,6 +504,12 @@
       </div>
     </div>
     <div class="loader-overlay" id="shoot-loader"><div class="spinner"></div>家具をロード中…</div>
+    <div class="shoot-edit-bar" id="shoot-edit-bar">
+      <button class="room-edit-btn" id="s-rot-l">↺ 回転</button>
+      <button class="room-edit-btn" id="s-stash">📦 しまう</button>
+      <button class="room-edit-btn primary" id="s-deselect">確定</button>
+      <button class="room-edit-btn" id="s-rot-r">回転 ↻</button>
+    </div>
   </section>
 
   <!-- RESULT -->
@@ -492,15 +561,27 @@
     <div class="shoot-top">
       <button class="icon-btn" id="room-back" style="background: rgba(255,255,255,.85)">←</button>
       <div class="title"><b>マイルーム</b><span id="room-stat"></span></div>
+      <button class="icon-btn" id="room-stash" style="background: rgba(255,255,255,.85)" title="家具リスト">📦</button>
       <button class="icon-btn" id="room-reset" style="background: rgba(255,255,255,.85)" title="配置をリセット">⟲</button>
     </div>
     <div class="room-help" id="room-help">家具をタップ→ドラッグで自由に配置できます</div>
     <div class="room-edit-bar" id="room-edit-bar">
-      <button class="room-edit-btn" id="btn-rot-l">↺ 左に回転</button>
+      <button class="room-edit-btn" id="btn-rot-l">↺ 回転</button>
+      <button class="room-edit-btn" id="btn-stash">📦 しまう</button>
       <button class="room-edit-btn primary" id="btn-deselect">確定</button>
-      <button class="room-edit-btn" id="btn-rot-r">右に回転 ↻</button>
+      <button class="room-edit-btn" id="btn-rot-r">回転 ↻</button>
     </div>
   </section>
+</div>
+
+<div class="modal" id="stash-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="stash-title">家具リスト</h3>
+      <button class="icon-btn" id="stash-close">×</button>
+    </div>
+    <div class="modal-body" id="stash-body"></div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -655,9 +736,11 @@ function loadState() {
       gold: 0,
       owned: ['bed'],
       done: {},
+      roomLayout: {},
+      roomHidden: {},
     }, s);
   } catch (e) {
-    return { gold: 0, owned: ['bed'], done: {} };
+    return { gold: 0, owned: ['bed'], done: {}, roomLayout: {}, roomHidden: {} };
   }
 }
 function saveState() {
@@ -711,6 +794,46 @@ function toast(msg) {
   clearTimeout(toastT);
   toastT = setTimeout(() => toastEl.classList.remove('show'), 1800);
 }
+
+// ---------- Stash modal ----------
+function openStashModal({ title, items, onToggle }) {
+  const modal = document.getElementById('stash-modal');
+  document.getElementById('stash-title').textContent = title;
+  const body = document.getElementById('stash-body');
+  function render() {
+    body.innerHTML = '';
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'stash-item';
+      row.innerHTML = `
+        <div class="emo">${item.emo}</div>
+        <div class="name">${item.name}</div>
+        <div class="status ${item.visible ? '' : 'hidden'}">${item.visible ? '表示中' : 'しまった'}</div>
+      `;
+      const btn = document.createElement('button');
+      btn.className = 'btn tiny' + (item.visible ? ' secondary' : '');
+      btn.textContent = item.visible ? 'しまう' : '出す';
+      btn.onclick = () => {
+        item.visible = !item.visible;
+        onToggle && onToggle(item);
+        render();
+      };
+      row.appendChild(btn);
+      body.appendChild(row);
+    });
+    if (!items.length) {
+      body.innerHTML = '<p style="text-align:center;color:#999;padding:24px">家具がまだないよ</p>';
+    }
+  }
+  render();
+  modal.classList.add('show');
+}
+document.getElementById('stash-close').addEventListener('click', () => {
+  document.getElementById('stash-modal').classList.remove('show');
+});
+document.getElementById('stash-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'stash-modal') e.target.classList.remove('show');
+});
 
 // ---------- Requests List ----------
 function renderRequests() {
@@ -887,7 +1010,21 @@ async function startShoot(request) {
   floor.receiveShadow = true;
   scene.add(floor);
 
-  Object.assign(currentShoot, { renderer, scene, camera, controls, ambient, hemi, dir, floor, furnitures: {}, brightness: 1 });
+  // Selection ring (for in-shoot editing)
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.6, 0.7, 48),
+    new THREE.MeshBasicMaterial({ color: 0xff7aa2, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.012;
+  ring.visible = false;
+  ring.renderOrder = 999;
+  scene.add(ring);
+
+  Object.assign(currentShoot, {
+    renderer, scene, camera, controls, ambient, hemi, dir, floor,
+    furnitures: {}, brightness: 1, ring, selected: null,
+  });
   currentShoot.sceneId = request.preferredScene || 'studio';
   applyScene(SCENES[currentShoot.sceneId]);
   setLightAngle(45);
@@ -931,20 +1068,27 @@ async function startShoot(request) {
 
   // Load furnitures
   try {
-    const ids = [...new Set([...request.required, ...(request.optional || [])])];
+    const isPractice = request.id === 'practice';
+    const ids = isPractice
+      ? state.owned.slice()
+      : [...new Set([...request.required, ...(request.optional || [])])];
     const placements = layoutPositions(ids.length);
     for (let i = 0; i < ids.length; i++) {
       const id = ids[i];
       const obj = await loadFurniture(id);
       obj.position.x = placements[i].x;
       obj.position.z = placements[i].z;
-      obj.userData.id = id;
+      obj.userData.furnitureId = id;
       scene.add(obj);
       currentShoot.furnitures[id] = obj;
     }
-    // Frame all required objects
-    frameTo(request.required.map(id => currentShoot.furnitures[id]).filter(Boolean));
+    const focusObjs = (isPractice
+      ? Object.values(currentShoot.furnitures)
+      : request.required.map(id => currentShoot.furnitures[id]).filter(Boolean));
+    frameTo(focusObjs);
     document.getElementById('shoot-loader').style.display = 'none';
+    document.getElementById('shoot-stash').style.display = isPractice ? 'inline-flex' : 'none';
+    attachShootEditor(canvas, camera, controls);
   } catch (e) {
     console.error(e);
     document.getElementById('shoot-loader').innerHTML = 'GLBの読み込みに失敗しました。<br>(ローカル静的サーバ越しに開いてね)';
@@ -992,24 +1136,223 @@ document.getElementById('hint-btn').addEventListener('click', () => {
 });
 document.getElementById('shoot-back').addEventListener('click', () => show('home'));
 
-// Shutter
+// Shutter (hides selection ring during capture)
 document.getElementById('shutter').addEventListener('click', () => {
   if (!currentShoot.renderer) return;
-  // Force a render to ensure latest frame
+  const ring = currentShoot.ring;
+  const ringWasVisible = ring && ring.visible;
+  if (ring) ring.visible = false;
   currentShoot.renderer.render(currentShoot.scene, currentShoot.camera);
   const dataUrl = currentShoot.renderer.domElement.toDataURL('image/png');
+  if (ring && ringWasVisible) ring.visible = true;
   const evalResult = evaluateShot();
   showResult(dataUrl, evalResult);
+});
+
+// ----- In-shoot furniture editor -----
+function attachShootEditor(canvas, camera, controls) {
+  // Clean up previous listeners if any
+  if (currentShoot.editorListeners) {
+    Object.entries(currentShoot.editorListeners).forEach(([type, fn]) => {
+      canvas.removeEventListener(type, fn, type === 'pointerdown');
+    });
+  }
+  const raycaster = new THREE.Raycaster();
+  const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  const dragOffset = new THREE.Vector3();
+  const ring = currentShoot.ring;
+  const screen = document.getElementById('screen-shoot');
+  const editBar = document.getElementById('shoot-edit-bar');
+  let selected = null;
+  let isDragging = false;
+  let startedOnFurniture = false;
+  let touchStart = { x: 0, y: 0, t: 0 };
+
+  function ndc(e) {
+    const r = canvas.getBoundingClientRect();
+    return new THREE.Vector2(
+      ((e.clientX - r.left) / r.width) * 2 - 1,
+      -((e.clientY - r.top) / r.height) * 2 + 1
+    );
+  }
+  function findRoot(o) {
+    while (o && !o.userData.furnitureId) o = o.parent;
+    return o;
+  }
+  function visibleRoots() {
+    return Object.values(currentShoot.furnitures).filter(r => r.visible);
+  }
+  function updateRing() {
+    if (!selected) { ring.visible = false; return; }
+    const box = new THREE.Box3().setFromObject(selected);
+    const cx = (box.min.x + box.max.x) / 2;
+    const cz = (box.min.z + box.max.z) / 2;
+    const sx = box.max.x - box.min.x;
+    const sz = box.max.z - box.min.z;
+    const r = Math.max(sx, sz) * 0.6 + 0.08;
+    ring.position.set(cx, 0.012, cz);
+    ring.scale.setScalar(r / 0.65);
+    ring.visible = true;
+  }
+  function selectObj(root) {
+    selected = root;
+    currentShoot.selected = root;
+    updateRing();
+    screen.classList.add('editing');
+    editBar.classList.add('show');
+  }
+  function deselectObj() {
+    selected = null;
+    currentShoot.selected = null;
+    ring.visible = false;
+    screen.classList.remove('editing');
+    editBar.classList.remove('show');
+  }
+  currentShoot.deselect = deselectObj;
+  currentShoot.updateRing = updateRing;
+  currentShoot.getSelected = () => selected;
+
+  function onPointerDown(e) {
+    if (e.pointerType === 'touch' && e.isPrimary === false) return;
+    const m = ndc(e);
+    raycaster.setFromCamera(m, camera);
+    const hits = raycaster.intersectObjects(visibleRoots(), true);
+    touchStart = { x: e.clientX, y: e.clientY, t: Date.now() };
+    if (hits.length) {
+      const root = findRoot(hits[0].object);
+      if (root) {
+        selectObj(root);
+        const hp = new THREE.Vector3();
+        if (raycaster.ray.intersectPlane(dragPlane, hp)) {
+          dragOffset.set(root.position.x - hp.x, 0, root.position.z - hp.z);
+        }
+        isDragging = true;
+        startedOnFurniture = true;
+        controls.enabled = false;
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        e.stopImmediatePropagation();
+        return;
+      }
+    }
+    startedOnFurniture = false;
+  }
+  function onPointerMove(e) {
+    if (!isDragging || !selected) return;
+    const m = ndc(e);
+    raycaster.setFromCamera(m, camera);
+    const hp = new THREE.Vector3();
+    if (raycaster.ray.intersectPlane(dragPlane, hp)) {
+      selected.position.x = clamp(-4, 4, hp.x + dragOffset.x);
+      selected.position.z = clamp(-4, 4, hp.z + dragOffset.z);
+      updateRing();
+    }
+  }
+  function onPointerUp(e) {
+    if (isDragging) {
+      isDragging = false;
+      controls.enabled = true;
+      return;
+    }
+    if (!startedOnFurniture) {
+      const dx = e.clientX - touchStart.x;
+      const dy = e.clientY - touchStart.y;
+      const dt = Date.now() - touchStart.t;
+      if (Math.hypot(dx, dy) < 6 && dt < 300 && selected) {
+        const m = ndc(e);
+        raycaster.setFromCamera(m, camera);
+        const hits = raycaster.intersectObjects(visibleRoots(), true);
+        if (!hits.length) deselectObj();
+      }
+    }
+  }
+  canvas.addEventListener('pointerdown', onPointerDown, true);
+  canvas.addEventListener('pointermove', onPointerMove);
+  canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointercancel', onPointerUp);
+  currentShoot.editorListeners = {
+    pointerdown: onPointerDown, pointermove: onPointerMove,
+    pointerup: onPointerUp, pointercancel: onPointerUp,
+  };
+}
+
+// Shoot edit bar buttons (set up once)
+document.getElementById('s-rot-l').addEventListener('click', () => {
+  const sel = currentShoot.getSelected && currentShoot.getSelected();
+  if (sel) { sel.rotation.y += Math.PI / 12; currentShoot.updateRing && currentShoot.updateRing(); }
+});
+document.getElementById('s-rot-r').addEventListener('click', () => {
+  const sel = currentShoot.getSelected && currentShoot.getSelected();
+  if (sel) { sel.rotation.y -= Math.PI / 12; currentShoot.updateRing && currentShoot.updateRing(); }
+});
+document.getElementById('s-deselect').addEventListener('click', () => {
+  currentShoot.deselect && currentShoot.deselect();
+});
+document.getElementById('s-stash').addEventListener('click', () => {
+  const sel = currentShoot.getSelected && currentShoot.getSelected();
+  if (!sel) return;
+  const id = sel.userData.furnitureId;
+  if (currentShoot.request && currentShoot.request.required.includes(id)) {
+    toast('依頼の必須家具はしまえません');
+    return;
+  }
+  sel.visible = false;
+  currentShoot.deselect && currentShoot.deselect();
+});
+
+// Shoot stash button (free shoot only)
+document.getElementById('shoot-stash').addEventListener('click', () => {
+  if (!currentShoot.scene) return;
+  const items = state.owned.map(id => {
+    const f = FURNITURES[id];
+    const root = currentShoot.furnitures[id];
+    return { id, name: f.name, emo: f.emo, visible: root ? root.visible : false };
+  });
+  openStashModal({
+    title: '家具リスト（しまう / 出す）',
+    items,
+    onToggle: async (item) => {
+      let root = currentShoot.furnitures[item.id];
+      if (!root && item.visible) {
+        // Lazy-load if user toggles ON something that wasn't placed yet
+        root = await loadFurniture(item.id);
+        root.userData.furnitureId = item.id;
+        const c = currentShoot.controls.target;
+        root.position.set(c.x, 0, c.z);
+        currentShoot.scene.add(root);
+        currentShoot.furnitures[item.id] = root;
+      }
+      if (root) root.visible = item.visible;
+      const sel = currentShoot.getSelected && currentShoot.getSelected();
+      if (!item.visible && sel && sel.userData.furnitureId === item.id) {
+        currentShoot.deselect && currentShoot.deselect();
+      }
+    },
+  });
 });
 
 function closeShoot() {
   if (currentShoot.raf) cancelAnimationFrame(currentShoot.raf);
   if (currentShoot.resize) window.removeEventListener('resize', currentShoot.resize);
+  if (currentShoot.editorListeners) {
+    const canvas = document.getElementById('shoot-canvas');
+    Object.entries(currentShoot.editorListeners).forEach(([type, fn]) => {
+      canvas.removeEventListener(type, fn, type === 'pointerdown');
+    });
+    currentShoot.editorListeners = null;
+  }
   if (currentShoot.renderer) {
     currentShoot.renderer.dispose();
     currentShoot.renderer = null;
   }
+  document.getElementById('screen-shoot').classList.remove('editing');
+  document.getElementById('shoot-edit-bar').classList.remove('show');
+  document.getElementById('shoot-stash').style.display = 'none';
   currentShoot.scene = null;
+  currentShoot.selected = null;
+  currentShoot.ring = null;
+  currentShoot.deselect = null;
+  currentShoot.getSelected = null;
+  currentShoot.updateRing = null;
 }
 
 // ---------- Evaluation ----------
@@ -1278,6 +1621,7 @@ async function openRoom() {
     { x: 1.6, z: 1.6, ry: -0.2 },
     { x: 0, z: -2, ry: 0 },
   ];
+  const hidden = state.roomHidden || {};
   const furnitureRoots = [];
   for (let i = 0; i < owned.length; i++) {
     const id = owned[i];
@@ -1288,6 +1632,7 @@ async function openRoom() {
     obj.position.z = saved ? saved.z : def.z;
     obj.rotation.y = saved ? saved.ry : def.ry;
     obj.userData.furnitureId = id;
+    obj.visible = !hidden[id];
     scene.add(obj);
     furnitureRoots.push(obj);
   }
@@ -1366,11 +1711,12 @@ async function openRoom() {
     saveState();
   }
 
+  function visibleRoots() { return furnitureRoots.filter(r => r.visible); }
   function onPointerDown(e) {
     if (e.pointerType === 'touch' && e.isPrimary === false) return;
     const m = ndc(e);
     raycaster.setFromCamera(m, camera);
-    const hits = raycaster.intersectObjects(furnitureRoots, true);
+    const hits = raycaster.intersectObjects(visibleRoots(), true);
     touchStart = { x: e.clientX, y: e.clientY, t: Date.now() };
     if (hits.length) {
       const root = findRoot(hits[0].object);
@@ -1415,7 +1761,7 @@ async function openRoom() {
       if (Math.hypot(dx, dy) < 6 && dt < 300 && selected) {
         const m = ndc(e);
         raycaster.setFromCamera(m, camera);
-        const hits = raycaster.intersectObjects(furnitureRoots, true);
+        const hits = raycaster.intersectObjects(visibleRoots(), true);
         if (!hits.length) deselectObj();
       }
     }
@@ -1428,13 +1774,45 @@ async function openRoom() {
   const rotL = document.getElementById('btn-rot-l');
   const rotR = document.getElementById('btn-rot-r');
   const desel = document.getElementById('btn-deselect');
+  const stashBtn = document.getElementById('btn-stash');
   const resetBtn = document.getElementById('room-reset');
+  const roomStashBtn = document.getElementById('room-stash');
   rotL.onclick = () => { if (selected) { selected.rotation.y += Math.PI / 12; updateRing(); saveLayout(); } };
   rotR.onclick = () => { if (selected) { selected.rotation.y -= Math.PI / 12; updateRing(); saveLayout(); } };
   desel.onclick = () => deselectObj();
+  stashBtn.onclick = () => {
+    if (!selected) return;
+    const id = selected.userData.furnitureId;
+    state.roomHidden = state.roomHidden || {};
+    state.roomHidden[id] = true;
+    selected.visible = false;
+    saveState();
+    deselectObj();
+    toast('しまいました（📦 から戻せます）');
+  };
+  roomStashBtn.onclick = () => {
+    const items = state.owned.map(id => {
+      const f = FURNITURES[id];
+      return { id, name: f.name, emo: f.emo, visible: !(state.roomHidden && state.roomHidden[id]) };
+    });
+    openStashModal({
+      title: '家具リスト（しまう / 出す）',
+      items,
+      onToggle: (item) => {
+        state.roomHidden = state.roomHidden || {};
+        if (item.visible) delete state.roomHidden[item.id];
+        else state.roomHidden[item.id] = true;
+        saveState();
+        const root = furnitureRoots.find(r => r.userData.furnitureId === item.id);
+        if (root) root.visible = item.visible;
+        if (!item.visible && selected && selected.userData.furnitureId === item.id) deselectObj();
+      },
+    });
+  };
   resetBtn.onclick = () => {
-    if (!confirm('配置を初期に戻しますか？')) return;
+    if (!confirm('配置を初期に戻しますか？（しまった家具も全て出します）')) return;
     state.roomLayout = {};
+    state.roomHidden = {};
     saveState();
     closeRoom();
     openRoom();
