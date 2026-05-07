@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffe4ec">
-<title>お写ん歩スタジオ｜家具フォトゲーム</title>
+<title>ROOMGRAPH｜家具フォトゲーム</title>
 <style>
   :root {
     --pink: #ff7aa2;
@@ -99,12 +99,17 @@
     text-align: center; padding: 32px;
   }
   .title-art {
-    font-size: 56px; font-weight: 900;
+    font-size: 60px; font-weight: 900;
     background: linear-gradient(180deg, #ff96b4, var(--pink-dark));
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    line-height: 1.05; letter-spacing: .02em;
-    text-shadow: 0 6px 0 rgba(255, 122, 162, .12);
-    margin-bottom: 8px;
+    line-height: 1.0; letter-spacing: .12em;
+    margin-bottom: 4px;
+    font-family: "Helvetica Neue", "Arial", system-ui, sans-serif;
+  }
+  .title-mark {
+    font-size: 12px; letter-spacing: .35em;
+    color: var(--pink-dark); font-weight: 800;
+    margin-bottom: 16px;
   }
   .title-sub { color: var(--ink-soft); margin-bottom: 36px; font-size: 14px; }
   .camera-illust {
@@ -310,6 +315,37 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Room editor */
+  .room-help {
+    position: absolute; left: 50%;
+    top: calc(max(env(safe-area-inset-top), 12px) + 56px);
+    transform: translateX(-50%);
+    background: rgba(0,0,0,.55); color: #fff;
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 12px; z-index: 5;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .room-edit-bar {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 12px 12px max(env(safe-area-inset-bottom), 14px);
+    display: none; gap: 8px; justify-content: center;
+    background: linear-gradient(0deg, rgba(0,0,0,.5), transparent);
+    z-index: 6;
+  }
+  .room-edit-bar.show { display: flex; }
+  .room-edit-btn {
+    flex: 1; max-width: 130px;
+    background: rgba(255,255,255,.94);
+    color: var(--ink);
+    padding: 12px 6px;
+    border-radius: 14px; border: none;
+    font-weight: 800; font-size: 13px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  }
+  .room-edit-btn:active { transform: scale(.97); }
+  .room-edit-btn.primary { background: var(--pink); color: #fff; }
+
   /* small screens: hide title heading */
   @media (max-height: 640px) {
     .title-art { font-size: 40px; }
@@ -322,11 +358,12 @@
 
   <!-- TITLE -->
   <section id="screen-title" class="screen active">
-    <div class="title-art">お写ん歩<br>スタジオ</div>
-    <div class="title-sub">家具を撮って、お部屋をかわいく。</div>
+    <div class="title-mark">— SHOOT &amp; FURNISH —</div>
+    <div class="title-art">ROOMGRAPH</div>
+    <div class="title-sub">撮って、稼いで、お部屋を彩る。</div>
     <div class="camera-illust"></div>
     <button class="btn" id="btn-start">はじめる</button>
-    <div class="start-hint">スマホでも遊べる3D家具フォトゲーム</div>
+    <div class="start-hint">3D家具フォトゲーム</div>
   </section>
 
   <!-- HOME -->
@@ -391,7 +428,7 @@
       <div class="panel-row" id="scene-pills"></div>
       <div class="slider-row">
         <label>明るさ</label>
-        <input type="range" id="light-int" min="0.2" max="2.4" step="0.05" value="1">
+        <input type="range" id="light-int" min="0.4" max="3.0" step="0.05" value="1">
       </div>
       <div class="slider-row">
         <label>光の向き</label>
@@ -455,7 +492,13 @@
     <div class="shoot-top">
       <button class="icon-btn" id="room-back" style="background: rgba(255,255,255,.85)">←</button>
       <div class="title"><b>マイルーム</b><span id="room-stat"></span></div>
-      <span style="width:40px"></span>
+      <button class="icon-btn" id="room-reset" style="background: rgba(255,255,255,.85)" title="配置をリセット">⟲</button>
+    </div>
+    <div class="room-help" id="room-help">家具をタップ→ドラッグで自由に配置できます</div>
+    <div class="room-edit-bar" id="room-edit-bar">
+      <button class="room-edit-btn" id="btn-rot-l">↺ 左に回転</button>
+      <button class="room-edit-btn primary" id="btn-deselect">確定</button>
+      <button class="room-edit-btn" id="btn-rot-r">右に回転 ↻</button>
     </div>
   </section>
 </div>
@@ -513,33 +556,33 @@ const FURNITURES = {
 const SCENES = {
   studio: {
     id: 'studio', name: '白ホリ',
-    bg: 0xfafafa, floor: 0xeeeeee,
-    ambient: 0.55, dirIntensity: 1.0,
-    lightColor: 0xffffff, fogNear: 30, fogFar: 60,
+    bg: 0xffffff, floor: 0xf5f5f5,
+    ambient: 1.4, hemi: 1.0, dirIntensity: 2.0,
+    lightColor: 0xffffff, fogNear: 40, fogFar: 80,
   },
   morning: {
     id: 'morning', name: '朝',
     bg: 0xfff3df, floor: 0xf2dfb8,
-    ambient: 0.5, dirIntensity: 1.1,
-    lightColor: 0xfff1cf, fogNear: 30, fogFar: 60,
+    ambient: 1.2, hemi: 0.9, dirIntensity: 2.0,
+    lightColor: 0xfff1cf, fogNear: 35, fogFar: 70,
   },
   evening: {
     id: 'evening', name: '夕暮れ',
     bg: 0xffc88a, floor: 0xc88350,
-    ambient: 0.45, dirIntensity: 0.95,
+    ambient: 0.95, hemi: 0.7, dirIntensity: 1.8,
     lightColor: 0xffb066, fogNear: 30, fogFar: 60,
   },
   night: {
     id: 'night', name: 'ナイト',
     bg: 0x1a2240, floor: 0x12182a,
-    ambient: 0.25, dirIntensity: 0.8,
+    ambient: 0.7, hemi: 0.5, dirIntensity: 1.4,
     lightColor: 0xb6c8ff, fogNear: 20, fogFar: 50,
   },
   natural: {
     id: 'natural', name: 'ナチュラル',
     bg: 0xe8efe1, floor: 0xc7b69a,
-    ambient: 0.55, dirIntensity: 1.0,
-    lightColor: 0xfff7e2, fogNear: 30, fogFar: 60,
+    ambient: 1.2, hemi: 0.9, dirIntensity: 1.9,
+    lightColor: 0xfff7e2, fogNear: 35, fogFar: 70,
   },
 };
 
@@ -674,7 +717,6 @@ function renderRequests() {
   const list = document.getElementById('request-list');
   list.innerHTML = '';
   REQUESTS.forEach(r => {
-    const missing = r.required.filter(id => !state.owned.includes(id));
     const div = document.createElement('div');
     div.className = 'request' + (state.done[r.id] ? ' done' : '');
     div.innerHTML = `
@@ -682,29 +724,17 @@ function renderRequests() {
       <h3>${r.title}</h3>
       <div class="desc">${r.desc}</div>
       <div class="meta">
-        ${missing.length
-          ? `<span class="badge locked">未所持: ${missing.map(id => FURNITURES[id].name).join(', ')}</span>`
-          : `<span class="badge">必要家具: OK</span>`
-        }
+        <span class="badge">必要家具: ${r.required.map(id => FURNITURES[id].name).join(', ')}</span>
         <span class="reward">${r.reward} G</span>
       </div>
     `;
-    if (missing.length === 0) {
-      const btn = document.createElement('button');
-      btn.className = 'btn tiny';
-      btn.textContent = state.done[r.id] ? 'もう一度撮る' : '受ける';
-      btn.style.marginTop = '8px';
-      btn.style.alignSelf = 'flex-end';
-      btn.addEventListener('click', () => startShoot(r));
-      div.appendChild(btn);
-    } else {
-      const sub = document.createElement('div');
-      sub.style.fontSize = '11px';
-      sub.style.color = 'var(--ink-soft)';
-      sub.style.marginTop = '8px';
-      sub.textContent = '※ ショップで「' + missing.map(id => FURNITURES[id].name).join('、') + '」を購入すると受けられるよ';
-      div.appendChild(sub);
-    }
+    const btn = document.createElement('button');
+    btn.className = 'btn tiny';
+    btn.textContent = state.done[r.id] ? 'もう一度撮る' : '受ける';
+    btn.style.marginTop = '8px';
+    btn.style.alignSelf = 'flex-end';
+    btn.addEventListener('click', () => startShoot(r));
+    div.appendChild(btn);
     list.appendChild(div);
   });
 }
@@ -775,16 +805,17 @@ function loadFurniture(id) {
 // ---------- Shoot Scene ----------
 const currentShoot = {
   renderer: null, scene: null, camera: null, controls: null,
-  ambient: null, dir: null, sceneId: 'studio',
+  ambient: null, dir: null, hemi: null, sceneId: 'studio',
   furnitures: {}, request: null, raf: null, floor: null,
+  brightness: 1,
 };
 
 function setupRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMapping = THREE.LinearToneMapping;
+  renderer.toneMappingExposure = 1.25;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   return renderer;
@@ -795,10 +826,11 @@ function applyScene(setting) {
   s.background = new THREE.Color(setting.bg);
   s.fog = new THREE.Fog(setting.bg, setting.fogNear, setting.fogFar);
   currentShoot.floor.material.color.setHex(setting.floor);
-  currentShoot.ambient.intensity = setting.ambient;
+  const m = currentShoot.brightness;
+  currentShoot.ambient.intensity = setting.ambient * m;
+  currentShoot.hemi.intensity = setting.hemi * m;
   currentShoot.dir.color.setHex(setting.lightColor);
-  currentShoot.dir.intensity = setting.dirIntensity;
-  document.getElementById('light-int').value = setting.dirIntensity;
+  currentShoot.dir.intensity = setting.dirIntensity * m;
 }
 
 function setLightAngle(deg) {
@@ -829,9 +861,12 @@ async function startShoot(request) {
   controls.maxDistance = 10;
   controls.maxPolarAngle = Math.PI / 2 + 0.1;
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+  const ambient = new THREE.AmbientLight(0xffffff, 1.2);
   scene.add(ambient);
-  const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+  const hemi = new THREE.HemisphereLight(0xffffff, 0xe6e6f0, 0.9);
+  hemi.position.set(0, 10, 0);
+  scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff, 1.8);
   dir.castShadow = true;
   dir.shadow.mapSize.set(1024, 1024);
   dir.shadow.camera.near = 0.5;
@@ -840,6 +875,7 @@ async function startShoot(request) {
   dir.shadow.camera.right = 6;
   dir.shadow.camera.top = 6;
   dir.shadow.camera.bottom = -6;
+  dir.shadow.bias = -0.0005;
   scene.add(dir);
   scene.add(dir.target);
 
@@ -851,10 +887,12 @@ async function startShoot(request) {
   floor.receiveShadow = true;
   scene.add(floor);
 
-  Object.assign(currentShoot, { renderer, scene, camera, controls, ambient, dir, floor, furnitures: {} });
+  Object.assign(currentShoot, { renderer, scene, camera, controls, ambient, hemi, dir, floor, furnitures: {}, brightness: 1 });
   currentShoot.sceneId = request.preferredScene || 'studio';
   applyScene(SCENES[currentShoot.sceneId]);
   setLightAngle(45);
+  document.getElementById('light-int').value = 1;
+  document.getElementById('light-dir').value = 45;
 
   // Scene pills
   const pills = document.getElementById('scene-pills');
@@ -935,7 +973,9 @@ function frameTo(objs) {
 
 // Light + brightness inputs
 document.getElementById('light-int').addEventListener('input', e => {
-  if (currentShoot.dir) currentShoot.dir.intensity = parseFloat(e.target.value);
+  if (!currentShoot.scene) return;
+  currentShoot.brightness = parseFloat(e.target.value);
+  applyScene(SCENES[currentShoot.sceneId]);
 });
 document.getElementById('light-dir').addEventListener('input', e => {
   setLightAngle(parseFloat(e.target.value));
@@ -1054,14 +1094,14 @@ function evaluateShot() {
   if (pitch > 70) angleScore = Math.min(angleScore, 50); // too top-down
   if (pitch < 0) angleScore = Math.min(angleScore, 60); // looking up too much
 
-  // Lighting
-  const totalLight = currentShoot.ambient.intensity + currentShoot.dir.intensity;
+  // Lighting (brightness multiplier sweet spot 0.7-1.6)
+  const b = currentShoot.brightness;
   let lighting;
-  if (totalLight < 0.5) lighting = 30;
-  else if (totalLight < 0.9) lighting = 65;
-  else if (totalLight < 1.9) lighting = 100;
-  else if (totalLight < 2.4) lighting = 75;
-  else lighting = 45;
+  if (b < 0.5) lighting = 35;
+  else if (b < 0.7) lighting = 70;
+  else if (b < 1.7) lighting = 100;
+  else if (b < 2.3) lighting = 75;
+  else lighting = 50;
 
   // Theme
   const themeMatch = currentShoot.sceneId === req.preferredScene;
@@ -1161,65 +1201,104 @@ function showResult(dataUrl, evalRes) {
 }
 
 // ---------- My Room ----------
-const currentRoom = { renderer: null, scene: null, camera: null, controls: null, raf: null };
+const currentRoom = {
+  renderer: null, scene: null, camera: null, controls: null, raf: null,
+  furnitureRoots: [], ring: null, listeners: null,
+};
+
 async function openRoom() {
   const canvas = document.getElementById('room-canvas');
   const renderer = setupRenderer(canvas);
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xfff3e9);
-  scene.fog = new THREE.Fog(0xfff3e9, 20, 50);
+  scene.background = new THREE.Color(0xfff8ee);
+  scene.fog = new THREE.Fog(0xfff8ee, 30, 80);
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
-  camera.position.set(4.5, 3.5, 5);
+  camera.position.set(5, 4, 5.5);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.target.set(0, 0.8, 0);
-  controls.maxPolarAngle = Math.PI / 2 + 0.1;
-  controls.minDistance = 2;
-  controls.maxDistance = 14;
+  controls.maxPolarAngle = Math.PI / 2 + 0.05;
+  controls.minDistance = 2.5;
+  controls.maxDistance = 16;
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-  const dir = new THREE.DirectionalLight(0xfff5d6, 1.0);
-  dir.position.set(5, 8, 4);
+  // Bright lighting (matches new shoot-scene philosophy)
+  scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+  const hemi = new THREE.HemisphereLight(0xffffff, 0xeeeeee, 1.0);
+  scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xfff5d6, 1.7);
+  dir.position.set(5, 9, 4);
   dir.castShadow = true;
   dir.shadow.mapSize.set(1024, 1024);
+  dir.shadow.camera.near = 0.5;
+  dir.shadow.camera.far = 30;
+  dir.shadow.camera.left = -8;
+  dir.shadow.camera.right = 8;
+  dir.shadow.camera.top = 8;
+  dir.shadow.camera.bottom = -8;
+  dir.shadow.bias = -0.0005;
   scene.add(dir);
 
-  // Walls (two walls)
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0xfff0e0, roughness: 1 });
-  const wallA = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat);
-  wallA.position.set(0, 3, -4);
+  // Walls
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xfff5e6, roughness: 1 });
+  const wallA = new THREE.Mesh(new THREE.PlaneGeometry(14, 6), wallMat);
+  wallA.position.set(0, 3, -5);
+  wallA.receiveShadow = true;
   scene.add(wallA);
-  const wallB = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat);
-  wallB.position.set(-4, 3, 0);
+  const wallB = new THREE.Mesh(new THREE.PlaneGeometry(14, 6), wallMat);
+  wallB.position.set(-5, 3, 0);
   wallB.rotation.y = Math.PI / 2;
+  wallB.receiveShadow = true;
   scene.add(wallB);
   // Floor
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(16, 16),
-    new THREE.MeshStandardMaterial({ color: 0xeed4b6, roughness: 1 })
+    new THREE.PlaneGeometry(20, 20),
+    new THREE.MeshStandardMaterial({ color: 0xf2dcc0, roughness: 1 })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // Place owned furniture
+  // Selection ring
+  const ringGeom = new THREE.RingGeometry(0.6, 0.7, 48);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0xff7aa2, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false });
+  const ring = new THREE.Mesh(ringGeom, ringMat);
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.012;
+  ring.visible = false;
+  ring.renderOrder = 999;
+  scene.add(ring);
+
+  // Place owned furniture using saved layout
+  const layout = state.roomLayout || {};
   const owned = state.owned;
-  const positions = [
-    { x: -1.5, z: -2.5 },
-    { x: 2, z: -2.5 },
-    { x: -2.5, z: 1 },
-    { x: 1.5, z: 1.5 },
+  const defaults = [
+    { x: -1.8, z: -3, ry: 0.2 },
+    { x: 2.2, z: -3, ry: -0.3 },
+    { x: -3, z: 1, ry: 0.5 },
+    { x: 1.6, z: 1.6, ry: -0.2 },
+    { x: 0, z: -2, ry: 0 },
   ];
+  const furnitureRoots = [];
   for (let i = 0; i < owned.length; i++) {
-    const obj = await loadFurniture(owned[i]);
-    obj.position.x = positions[i % positions.length].x;
-    obj.position.z = positions[i % positions.length].z;
-    obj.rotation.y = Math.random() * 0.6 - 0.3;
+    const id = owned[i];
+    const obj = await loadFurniture(id);
+    const saved = layout[id];
+    const def = defaults[i % defaults.length];
+    obj.position.x = saved ? saved.x : def.x;
+    obj.position.z = saved ? saved.z : def.z;
+    obj.rotation.y = saved ? saved.ry : def.ry;
+    obj.userData.furnitureId = id;
     scene.add(obj);
+    furnitureRoots.push(obj);
   }
 
   document.getElementById('room-stat').textContent = ' / 所持家具 ' + owned.length + '点';
+  const helpEl = document.getElementById('room-help');
+  const barEl = document.getElementById('room-edit-bar');
+  helpEl.textContent = '家具をタップ→ドラッグで自由に配置できます';
+  barEl.classList.remove('show');
 
+  // Resize
   function resize() {
     const r = canvas.getBoundingClientRect();
     renderer.setSize(r.width, r.height, false);
@@ -1230,7 +1309,143 @@ async function openRoom() {
   window.addEventListener('resize', resize);
   currentRoom.resize = resize;
 
-  Object.assign(currentRoom, { renderer, scene, camera, controls });
+  // ----- Selection / drag -----
+  const raycaster = new THREE.Raycaster();
+  const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  const dragOffset = new THREE.Vector3();
+  let selected = null;
+  let isDragging = false;
+  let startedOnFurniture = false;
+  let touchStart = { x: 0, y: 0, t: 0 };
+
+  function ndc(e) {
+    const r = canvas.getBoundingClientRect();
+    return new THREE.Vector2(
+      ((e.clientX - r.left) / r.width) * 2 - 1,
+      -((e.clientY - r.top) / r.height) * 2 + 1
+    );
+  }
+  function findRoot(o) {
+    while (o && !o.userData.furnitureId) o = o.parent;
+    return o;
+  }
+  function updateRing() {
+    if (!selected) { ring.visible = false; return; }
+    const box = new THREE.Box3().setFromObject(selected);
+    const cx = (box.min.x + box.max.x) / 2;
+    const cz = (box.min.z + box.max.z) / 2;
+    const sx = box.max.x - box.min.x;
+    const sz = box.max.z - box.min.z;
+    const r = Math.max(sx, sz) * 0.6 + 0.08;
+    ring.position.set(cx, 0.012, cz);
+    ring.scale.setScalar(r / 0.65);
+    ring.visible = true;
+  }
+  function selectObj(root) {
+    selected = root;
+    updateRing();
+    barEl.classList.add('show');
+    helpEl.textContent = 'ドラッグで移動 / ボタンで回転';
+  }
+  function deselectObj() {
+    selected = null;
+    ring.visible = false;
+    barEl.classList.remove('show');
+    helpEl.textContent = '家具をタップ→ドラッグで自由に配置できます';
+  }
+  function saveLayout() {
+    const layout = {};
+    furnitureRoots.forEach(r => {
+      layout[r.userData.furnitureId] = {
+        x: r.position.x,
+        z: r.position.z,
+        ry: r.rotation.y,
+      };
+    });
+    state.roomLayout = layout;
+    saveState();
+  }
+
+  function onPointerDown(e) {
+    if (e.pointerType === 'touch' && e.isPrimary === false) return;
+    const m = ndc(e);
+    raycaster.setFromCamera(m, camera);
+    const hits = raycaster.intersectObjects(furnitureRoots, true);
+    touchStart = { x: e.clientX, y: e.clientY, t: Date.now() };
+    if (hits.length) {
+      const root = findRoot(hits[0].object);
+      if (root) {
+        selectObj(root);
+        const hp = new THREE.Vector3();
+        if (raycaster.ray.intersectPlane(dragPlane, hp)) {
+          dragOffset.set(root.position.x - hp.x, 0, root.position.z - hp.z);
+        }
+        isDragging = true;
+        startedOnFurniture = true;
+        controls.enabled = false;
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        e.stopImmediatePropagation();
+        return;
+      }
+    }
+    startedOnFurniture = false;
+  }
+  function onPointerMove(e) {
+    if (!isDragging || !selected) return;
+    const m = ndc(e);
+    raycaster.setFromCamera(m, camera);
+    const hp = new THREE.Vector3();
+    if (raycaster.ray.intersectPlane(dragPlane, hp)) {
+      selected.position.x = clamp(-4.6, 4.6, hp.x + dragOffset.x);
+      selected.position.z = clamp(-4.4, 4.6, hp.z + dragOffset.z);
+      updateRing();
+    }
+  }
+  function onPointerUp(e) {
+    if (isDragging) {
+      isDragging = false;
+      controls.enabled = true;
+      saveLayout();
+      return;
+    }
+    if (!startedOnFurniture) {
+      const dx = e.clientX - touchStart.x;
+      const dy = e.clientY - touchStart.y;
+      const dt = Date.now() - touchStart.t;
+      if (Math.hypot(dx, dy) < 6 && dt < 300 && selected) {
+        const m = ndc(e);
+        raycaster.setFromCamera(m, camera);
+        const hits = raycaster.intersectObjects(furnitureRoots, true);
+        if (!hits.length) deselectObj();
+      }
+    }
+  }
+  canvas.addEventListener('pointerdown', onPointerDown, true);
+  canvas.addEventListener('pointermove', onPointerMove);
+  canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointercancel', onPointerUp);
+
+  const rotL = document.getElementById('btn-rot-l');
+  const rotR = document.getElementById('btn-rot-r');
+  const desel = document.getElementById('btn-deselect');
+  const resetBtn = document.getElementById('room-reset');
+  rotL.onclick = () => { if (selected) { selected.rotation.y += Math.PI / 12; updateRing(); saveLayout(); } };
+  rotR.onclick = () => { if (selected) { selected.rotation.y -= Math.PI / 12; updateRing(); saveLayout(); } };
+  desel.onclick = () => deselectObj();
+  resetBtn.onclick = () => {
+    if (!confirm('配置を初期に戻しますか？')) return;
+    state.roomLayout = {};
+    saveState();
+    closeRoom();
+    openRoom();
+  };
+
+  currentRoom.listeners = {
+    pointerdown: onPointerDown, pointermove: onPointerMove,
+    pointerup: onPointerUp, pointercancel: onPointerUp,
+  };
+  Object.assign(currentRoom, { renderer, scene, camera, controls, ring, furnitureRoots });
+
   function tick() {
     controls.update();
     renderer.render(scene, camera);
@@ -1238,12 +1453,23 @@ async function openRoom() {
   }
   tick();
 }
+
 function closeRoom() {
   if (currentRoom.raf) cancelAnimationFrame(currentRoom.raf);
   if (currentRoom.resize) window.removeEventListener('resize', currentRoom.resize);
+  const canvas = document.getElementById('room-canvas');
+  if (currentRoom.listeners && canvas) {
+    canvas.removeEventListener('pointerdown', currentRoom.listeners.pointerdown, true);
+    canvas.removeEventListener('pointermove', currentRoom.listeners.pointermove);
+    canvas.removeEventListener('pointerup', currentRoom.listeners.pointerup);
+    canvas.removeEventListener('pointercancel', currentRoom.listeners.pointercancel);
+  }
   if (currentRoom.renderer) currentRoom.renderer.dispose();
+  document.getElementById('room-edit-bar').classList.remove('show');
   currentRoom.renderer = null;
   currentRoom.controls = null;
+  currentRoom.furnitureRoots = [];
+  currentRoom.listeners = null;
 }
 document.getElementById('room-back').addEventListener('click', () => show('home'));
 
