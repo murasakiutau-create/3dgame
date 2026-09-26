@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>わくわく家具工房</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header id="topbar">
+    <div class="logo">🔨 <span>わくわく家具工房</span></div>
+    <nav id="modeTabs">
+      <button data-mode="build" class="active">🛠️ <span>じゆう工作</span></button>
+      <button data-mode="kit">📦 <span>組み立てキット</span></button>
+      <button data-mode="room">🏠 <span>お部屋ジオラマ</span></button>
+    </nav>
+    <div class="actions">
+      <button id="btnUndo" title="元に戻す (Ctrl+Z)">↶</button>
+      <button id="btnRedo" title="やり直す (Ctrl+Y)">↷</button>
+      <button id="btnCollection" title="コレクション">📚</button>
+      <button id="btnPhoto" title="写真をとる">📷</button>
+      <button id="btnSound" title="音のオン/オフ">🔊</button>
+      <button id="btnHelp" title="あそびかた">❓</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="viewport"></div>
+
+    <!-- 左パネル -->
+    <aside id="leftPanel" class="panel">
+      <!-- じゆう工作 -->
+      <section data-show="build">
+        <h2>🧩 パーツ</h2>
+        <div id="palette"></div>
+        <h3>⚙️ 工作のせってい</h3>
+        <label class="row">マス目
+          <select id="gridSize">
+            <option value="0.05">こまかい (0.5cm)</option>
+            <option value="0.1" selected>ふつう (1cm)</option>
+            <option value="0.25">あらい (2.5cm)</option>
+            <option value="0.5">とてもあらい (5cm)</option>
+          </select>
+        </label>
+        <label class="row check"><input type="checkbox" id="optSnap" checked /> マス目にぴったり</label>
+        <label class="row check"><input type="checkbox" id="optSurface" checked /> パーツの表面にくっつける</label>
+        <label class="row check"><input type="checkbox" id="optMulti" /> 続けて置く（Shiftと同じ）</label>
+        <div class="btnrow">
+          <button id="btnSave" class="primary">💾 保存</button>
+          <button id="btnClear">🧹 ぜんぶ片付け</button>
+        </div>
+      </section>
+
+      <!-- 組み立てキット -->
+      <section data-show="kit">
+        <div id="kitList">
+          <h2>📦 キットをえらんでね</h2>
+          <p class="note">プラモデルみたいに、説明書どおりにパーツをはめて組み立てよう。完成したら色をぬったり改造もできるよ！</p>
+          <div id="kitCards"></div>
+        </div>
+        <div id="kitGuide" hidden>
+          <h2 id="kitTitle"></h2>
+          <div class="progress"><div id="kitProgress"></div></div>
+          <ol id="kitSteps"></ol>
+          <div class="btnrow">
+            <button id="btnKitAuto">🤖 1つはめてもらう</button>
+            <button id="btnKitQuit">✖ やめる</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- お部屋ジオラマ -->
+      <section data-show="room">
+        <h2>🪑 家具コレクション</h2>
+        <p class="note">えらんでからお部屋をクリックして置こう。家具の上や壁にもくっつくよ。</p>
+        <div id="roomCollection"></div>
+        <h3>🏠 お部屋のもよう</h3>
+        <div class="sub">ゆか</div>
+        <div class="seg" id="floorStyle">
+          <button data-v="wood">フローリング</button>
+          <button data-v="tile">タイル</button>
+          <button data-v="carpet">カーペット</button>
+        </div>
+        <div class="swatches small" id="floorColors"></div>
+        <div class="sub">かべ</div>
+        <div class="seg" id="wallPattern">
+          <button data-v="plain">むじ</button>
+          <button data-v="stripe">ストライプ</button>
+          <button data-v="dot">ドット</button>
+          <button data-v="heart">ハート</button>
+        </div>
+        <div class="swatches small" id="wallColors"></div>
+        <div class="btnrow">
+          <button id="btnRoomClear">🧹 お部屋を片付け</button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- 右パネル -->
+    <aside id="rightPanel" class="panel">
+      <section id="paintSection">
+        <h2>🎨 色としあげ</h2>
+        <div class="swatches" id="swatches"></div>
+        <label class="row">じぶんで色をえらぶ <input type="color" id="customColor" value="#f4a7b9" /></label>
+        <div class="finishes" id="finishes"></div>
+        <button id="btnPaint" class="wide">🖌️ ぬりぬりモード</button>
+      </section>
+
+      <section id="inspector" hidden>
+        <h2 id="inspTitle">えらんだパーツ</h2>
+        <div class="seg" id="gizmoMode">
+          <button data-v="translate">✥ 移動 <kbd>1</kbd></button>
+          <button data-v="rotate">⟳ 回転 <kbd>2</kbd></button>
+          <button data-v="scale">⤡ サイズ <kbd>3</kbd></button>
+        </div>
+        <div id="sizeSliders">
+          <label class="slider">よこ <input type="range" id="sx" min="0.1" max="5" step="0.05" /><output id="sxo"></output></label>
+          <label class="slider">たかさ <input type="range" id="sy" min="0.1" max="5" step="0.05" /><output id="syo"></output></label>
+          <label class="slider">おくゆき <input type="range" id="sz" min="0.1" max="5" step="0.05" /><output id="szo"></output></label>
+        </div>
+        <div class="sub">まわす・うらがえす</div>
+        <div class="grid3">
+          <button id="rotY">↻ よこ90°</button>
+          <button id="rotX">⤵ たおす</button>
+          <button id="rotZ">↪ かたむける</button>
+          <button id="flipX">⇋ 左右反転</button>
+          <button id="flipY">⇵ 上下反転</button>
+          <button id="dropDown">⬇ 下にくっつける</button>
+        </div>
+        <div class="btnrow">
+          <button id="btnDup">📑 複製 <kbd>D</kbd></button>
+          <button id="btnDel" class="danger">🗑️ けす</button>
+        </div>
+      </section>
+
+      <section id="roomInspector" hidden>
+        <h2 id="roomInspTitle">えらんだ家具</h2>
+        <div class="seg" id="roomGizmoMode">
+          <button data-v="translate">✥ 移動</button>
+          <button data-v="rotate">⟳ 回転</button>
+        </div>
+        <label class="slider">おおきさ <input type="range" id="roomScale" min="0.4" max="2.5" step="0.05" /><output id="roomScaleO"></output></label>
+        <div class="grid3">
+          <button id="roomRotL">↺ 45°</button>
+          <button id="roomRotR">↻ 45°</button>
+          <button id="roomDrop">⬇ 床へ</button>
+        </div>
+        <div class="btnrow">
+          <button id="roomDup">📑 複製</button>
+          <button id="roomDel" class="danger">🗑️ しまう</button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- ランナー（キットのパーツ枠） -->
+    <div id="runner" hidden><div id="runnerInner"></div></div>
+
+    <!-- 視点操作 -->
+    <div id="viewControls">
+      <button id="vLeft" title="左にまわす">⟲</button>
+      <button id="vRight" title="右にまわす">⟳</button>
+      <button id="vTop" title="上から">⬆</button>
+      <button id="vFront" title="正面">◉</button>
+      <button id="vUnder" title="うらから見る">⬇</button>
+      <button id="vSpin" title="くるくる回転台">🔄</button>
+      <button id="vIn" title="ちかづく">＋</button>
+      <button id="vOut" title="はなれる">－</button>
+      <button id="vFit" title="ぜんたいを見る">🎯</button>
+    </div>
+
+    <button id="toggleLeft" class="mobile-toggle">🧩</button>
+    <button id="toggleRight" class="mobile-toggle">🎨</button>
+
+    <div id="hint"></div>
+    <div id="toast"></div>
+    <div id="loading">よみこみ中…🔨</div>
+  </main>
+
+  <div id="modal" hidden>
+    <div class="modal-card">
+      <h2 id="modalTitle"></h2>
+      <div id="modalBody"></div>
+      <div id="modalButtons" class="btnrow"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
