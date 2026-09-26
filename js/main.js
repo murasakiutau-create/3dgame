@@ -1332,7 +1332,12 @@ function openCollection() {
       toast(`「${f.name}」を作業台にだしたよ`);
     };
     card.querySelector('[data-a=del]').onclick = () => {
-      if (!confirm(`「${f.name}」をコレクションからけしますか？`)) return;
+      const btn = card.querySelector('[data-a=del]');
+      if (!btn.dataset.armed) {
+        btn.dataset.armed = '1';
+        btn.textContent = 'ほんとに？';
+        return;
+      }
       collection = collection.filter((c) => c !== f);
       thumbCache.delete(f.id);
       saveCollection();
@@ -1595,12 +1600,12 @@ function takePhoto() {
   renderer.render(scene, camera);
   const url = renderer.domElement.toDataURL('image/png');
   hidden.forEach((o) => (o.visible = true));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `kagu-${Date.now()}.png`;
-  a.click();
   sfx('snap');
-  toast('📷 パシャ！');
+  openModal({
+    title: '📷 パシャ！',
+    body: `<img alt="とった写真" src="${url}" style="width:100%;border-radius:12px;display:block" /><p class="note">画像を長おし（右クリック）すると保存できるよ。</p>`,
+    buttons: [{ label: 'とじる', primary: true }],
+  });
 }
 
 function showHelp() {
